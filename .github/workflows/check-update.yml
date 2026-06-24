@@ -1,0 +1,92 @@
+name: Check XanMod EDGE Update
+
+on:
+  schedule:
+    # Run daily at 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    name: "EDGE Branch Update"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Detect EDGE branch prefix from xanmod tags
+        id: detect
+        run: |
+          PREFIXES=$(curl -s 'https://gitlab.com/api/v4/projects/xanmod%2Flinux/repository/tags?per_page=100' \
+            | jq -r '.[].name' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+-xanmod1$' \
+            | sed 's/\.[0-9]*-xanmod1$//' \
+            | sort -t. -k1,1nr -k2,2nr \
+            | uniq)
+
+          EDGE=$(echo "$PREFIXES" | head -n 1)
+          echo "Detected EDGE=$EDGE"
+          echo "prefix=$EDGE" >> "$GITHUB_OUTPUT"
+
+      - name: Check for new xanmod release
+        id: check
+        run: |
+          chmod +x check-update.sh
+          ./check-update.sh "${{ steps.detect.outputs.prefix }}"
+
+      - name: Commit updated spec
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add kernel.spec
+          git commit -m "Update EDGE to ${{ steps.check.outputs.version }}" || true
+          git pull --rebase
+          git push
+
+      - name: Install build dependencies
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Download source tarball
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          TAG="${{ steps.check.outputs.tag }}"
+          echo "Downloading linux-${TAG}.tar.bz2 ..."
+          curl -L -o "linux-${TAG}.tar.bz2" \
+            "https://gitlab.com/xanmod/linux/-/archive/${TAG}/linux-${TAG}.tar.bz2"
+          ls -lh "linux-${TAG}.tar.bz2"
+
+      - name: Build SRPM
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          mkdir -p rpmbuild/{BUILD,RPMS,SRPMS,SOURCES,SPECS,tmp}
+          rpmbuild -bs \
+            --define "debug_package %{nil}" \
+            --define "_sourcedir $PWD" \
+            --define "_srcrpmdir $PWD" \
+            --define "_topdir $PWD/rpmbuild" \
+            --define "_tmppath $PWD/rpmbuild/tmp" \
+            kernel.spec
+
+      - name: Install copr-cli
+        if: steps.check.outputs.updated == 'true'
+        run: pip3 install copr-cli
+
+      - name: Configure copr-cli
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          mkdir -p ~/.config
+          echo "${{ secrets.COPR_CONFIG }}" > ~/.config/copr
+
+      - name: Submit build to Copr
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          SRPM=$(ls *.src.rpm)
+          echo "Submitting $SRPM to Copr..."
+          copr-cli build brigge/XanMod "$SRPM" --nowait
