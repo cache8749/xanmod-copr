@@ -8,7 +8,7 @@ SPEC_FILE="kernel.spec"
 BRANCH_PREFIX="${1:?Usage: $0 <branch_prefix> (e.g. 7.0 or 7.1)}"
 
 # Get latest xanmod tag matching the given branch prefix
-LATEST_TAG=$(curl -s 'https://gitlab.com/api/v4/projects/xanmod%2Flinux/repository/tags?per_page=50' \
+LATEST_TAG=$(curl -s "https://gitlab.com/api/v4/projects/xanmod%2Flinux/repository/tags?per_page=50&search=${BRANCH_PREFIX}" \
     | jq -r '.[].name' \
     | grep -E "^${BRANCH_PREFIX}\.[0-9]+-xanmod1$" \
     | head -n 1)
@@ -50,8 +50,14 @@ sed -i "s/^%define kversion .*/%define kversion $KVERSION/" "$SPEC_FILE"
 sed -i "s/^%define tarfile_release .*/%define tarfile_release $LATEST_VERSION/" "$SPEC_FILE"
 sed -i "s/^%define patchlevel .*/%define patchlevel $PATCHLEVEL/" "$SPEC_FILE"
 sed -i "s/^%define kabiversion .*/%define kabiversion $LATEST_VERSION/" "$SPEC_FILE"
-
 echo "Spec file updated to $LATEST_VERSION"
+
+# Ensure version-specific redhat patch exists
+PATCH_FILE="patch-${MAJOR_MINOR}-redhat.patch"
+if [ ! -f "$PATCH_FILE" ]; then
+    echo "Creating empty patch file $PATCH_FILE"
+    touch "$PATCH_FILE"
+fi
 
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
     echo "updated=true" >> "$GITHUB_OUTPUT"
