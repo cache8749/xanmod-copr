@@ -1,2 +1,8 @@
-*.xz
-*.bz2
+# Everything the build generates. fedora/ is a mirror, build/ and cache/ are scratch.
+/build/
+/cache/
+*.src.rpm
+*.rpm
+*.tar.xz
+*.tar.bz2
+__pycache__/

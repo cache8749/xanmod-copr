@@ -1,92 +1,166 @@
-name: Check XanMod MAIN Update
+name: Sync Fedora and build XanMod
 
 on:
   schedule:
-    # Run daily at 06:00 UTC
+    # Daily at 06:00 UTC
     - cron: '0 6 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build even when nothing changed
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
+# Never let two runs push to fedora/ or submit to copr at the same time.
+concurrency:
+  group: xanmod-copr
+  cancel-in-progress: false
+
 jobs:
-  check-and-build:
+  build:
+    name: XanMod to copr
     runs-on: ubuntu-latest
-    name: "MAIN Branch Update"
+    env:
+      # The big git clone and tarball go on the roomier runner volume.
+      TMPDIR: ${{ runner.temp }}
+      COPR_PROJECT: brigge/XanMod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Detect MAIN branch prefix from xanmod tags
-        id: detect
-        run: |
-          PREFIXES=$(curl -s 'https://gitlab.com/api/v4/projects/xanmod%2Flinux/repository/tags?per_page=100' \
-            | jq -r '.[].name' \
-            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+-xanmod1$' \
-            | sed 's/\.[0-9]*-xanmod1$//' \
-            | sort -t. -k1,1nr -k2,2nr \
-            | uniq)
+      - name: Resolve XanMod release
+        id: xanmod
+        run: tools/xanmod-release.sh
 
-          MAIN=$(echo "$PREFIXES" | head -n 2 | tail -n 1)
-          echo "Detected MAIN=$MAIN"
-          echo "prefix=$MAIN" >> "$GITHUB_OUTPUT"
+      - name: Sync Fedora dist-git into fedora/
+        id: fedora
+        run: tools/sync-fedora.sh "${{ steps.xanmod.outputs.series }}"
 
-      - name: Check for new xanmod release
-        id: check
+      - name: Decide whether to build
+        id: decide
+        if: steps.fedora.outputs.matched == 'true'
         run: |
-          chmod +x check-update.sh
-          ./check-update.sh "${{ steps.detect.outputs.prefix }}"
+          set -euo pipefail
+          tag="${{ steps.xanmod.outputs.tag }}"
+          branch=$(jq -r .branch fedora-sync.json)
+          pkgrelease=$(jq -r .pkgrelease fedora-sync.json)
 
-      - name: Commit updated spec
-        if: steps.check.outputs.updated == 'true'
+          build=true
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            reason="build forced by workflow_dispatch"
+          elif [ ! -f build-state.json ]; then
+            reason="no previous build recorded"
+          else
+            prev_tag=$(jq -r '.xanmod_tag // ""' build-state.json)
+            prev_branch=$(jq -r '.fedora_branch // ""' build-state.json)
+            prev_pkgrelease=$(jq -r '.fedora_pkgrelease // ""' build-state.json)
+            if [ "$tag" != "$prev_tag" ]; then
+              reason="new XanMod release: $prev_tag -> $tag"
+            elif [ "$branch" != "$prev_branch" ]; then
+              reason="Fedora branch moved: $prev_branch -> $branch"
+            elif [ "$pkgrelease" != "$prev_pkgrelease" ]; then
+              reason="Fedora rebased: release $prev_pkgrelease -> $pkgrelease"
+            else
+              build=false
+              reason="already built $tag on Fedora $branch release $pkgrelease"
+            fi
+          fi
+
+          echo "$reason"
+          {
+            echo "build=$build"
+            echo "reason=$reason"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Job summary
+        if: always() && steps.fedora.conclusion == 'success'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add kernel.spec
-          git commit -m "Update MAIN to ${{ steps.check.outputs.version }}" || true
-          git pull --rebase
-          git push
+          {
+            echo "| | |"
+            echo "|---|---|"
+            echo "| XanMod tag | \`${{ steps.xanmod.outputs.tag }}\` |"
+            if [ "${{ steps.fedora.outputs.matched }}" = "true" ]; then
+              echo "| Fedora branch | \`${{ steps.fedora.outputs.branch }}\` (kernel $(jq -r .nvr fedora-sync.json)) |"
+              echo "| Decision | ${{ steps.decide.outputs.reason }} |"
+            else
+              echo "| Fedora branch | **no released branch ships kernel ${{ steps.xanmod.outputs.series }} yet - build skipped** |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Install build dependencies
-        if: steps.check.outputs.updated == 'true'
+        if: steps.decide.outputs.build == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y rpm
 
-      - name: Download source tarball
-        if: steps.check.outputs.updated == 'true'
-        run: |
-          TAG="${{ steps.check.outputs.tag }}"
-          echo "Downloading linux-${TAG}.tar.bz2 ..."
-          curl -L -o "linux-${TAG}.tar.bz2" \
-            "https://gitlab.com/xanmod/linux/-/archive/${TAG}/linux-${TAG}.tar.bz2"
-          ls -lh "linux-${TAG}.tar.bz2"
+      - name: Assemble build tree
+        if: steps.decide.outputs.build == 'true'
+        run: tools/assemble.sh "${{ steps.xanmod.outputs.version }}" "${{ steps.xanmod.outputs.tag }}"
 
       - name: Build SRPM
-        if: steps.check.outputs.updated == 'true'
+        id: srpm
+        if: steps.decide.outputs.build == 'true'
         run: |
-          mkdir -p rpmbuild/{BUILD,RPMS,SRPMS,SOURCES,SPECS,tmp}
+          set -euo pipefail
+          mkdir -p build/rpmbuild/{BUILD,RPMS,SRPMS,SOURCES,SPECS,tmp}
           rpmbuild -bs \
             --define "debug_package %{nil}" \
-            --define "_sourcedir $PWD" \
-            --define "_srcrpmdir $PWD" \
-            --define "_topdir $PWD/rpmbuild" \
-            --define "_tmppath $PWD/rpmbuild/tmp" \
-            kernel.spec
+            --define "_sourcedir $PWD/build" \
+            --define "_srcrpmdir $PWD/build" \
+            --define "_topdir $PWD/build/rpmbuild" \
+            --define "_tmppath $PWD/build/rpmbuild/tmp" \
+            build/kernel.spec
+          srpm=$(ls build/*.src.rpm)
+          ls -lh "$srpm"
+          echo "path=$srpm" >> "$GITHUB_OUTPUT"
 
       - name: Install copr-cli
-        if: steps.check.outputs.updated == 'true'
-        run: pip3 install copr-cli
+        if: steps.decide.outputs.build == 'true'
+        run: pipx install copr-cli || pip3 install --break-system-packages copr-cli
 
       - name: Configure copr-cli
-        if: steps.check.outputs.updated == 'true'
+        if: steps.decide.outputs.build == 'true'
         run: |
           mkdir -p ~/.config
           echo "${{ secrets.COPR_CONFIG }}" > ~/.config/copr
+          chmod 600 ~/.config/copr
 
-      - name: Submit build to Copr
-        if: steps.check.outputs.updated == 'true'
+      - name: Submit build to copr
+        if: steps.decide.outputs.build == 'true'
         run: |
-          SRPM=$(ls *.src.rpm)
-          echo "Submitting $SRPM to Copr..."
-          copr-cli build brigge/XanMod "$SRPM" --nowait
+          echo "Submitting ${{ steps.srpm.outputs.path }} to $COPR_PROJECT"
+          copr-cli build "$COPR_PROJECT" "${{ steps.srpm.outputs.path }}" --nowait
+
+      - name: Record what was submitted
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          tools/record-build.sh \
+            "${{ steps.xanmod.outputs.tag }}" \
+            "${{ steps.xanmod.outputs.version }}" \
+            "${{ steps.srpm.outputs.path }}"
+
+      - name: Commit fedora/ sync and build state
+        if: steps.fedora.outputs.matched == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A fedora fedora-sync.json
+          # Only exists once a build has actually been submitted.
+          if [ -f build-state.json ]; then git add build-state.json; fi
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          nvr=$(jq -r .nvr fedora-sync.json)
+          if [ "${{ steps.decide.outputs.build }}" = "true" ]; then
+            msg="Build ${{ steps.xanmod.outputs.tag }} on Fedora ${{ steps.fedora.outputs.branch }} ($nvr)"
+          else
+            msg="Sync Fedora ${{ steps.fedora.outputs.branch }} ($nvr)"
+          fi
+          git commit -m "$msg"
+          git pull --rebase --autostash
+          git push
