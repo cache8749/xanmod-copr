@@ -24,10 +24,13 @@ jobs:
     name: XanMod to copr
     runs-on: ubuntu-latest
     env:
-      # The big git clone and tarball go on the roomier runner volume.
-      TMPDIR: ${{ runner.temp }}
       COPR_PROJECT: brigge/XanMod
     steps:
+      # The big git clone and tarball go on the roomier runner volume.
+      # runner.* isn't available in job-level env, so export it here instead.
+      - name: Point TMPDIR at the runner scratch volume
+        run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Checkout repository
         uses: actions/checkout@v6
 
