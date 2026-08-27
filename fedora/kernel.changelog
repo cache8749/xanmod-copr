@@ -1,5 +1,22 @@
-* Mon Aug 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-61]
-- automotive: enable HUGETLBFS to workaround build error (Scott Weaver)
+* Thu Aug 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.1-0]
+- Initial setup for stable Fedora release (Justin M. Forbes)
+- Reset Makefile.rhelver for the 7.3 cycle (Justin M. Forbes)
+- Merge configs into common for 7.2 (Justin M. Forbes)
+- redhat/configs: automotive: enable RTC_DRV_PL031 (Eric Chanudet)
+- redhat: name the dtb and UKI arch lists (Jan Stancek)
+- redhat: use one spelling for the nobuildarches files guard (Jan Stancek)
+- redhat: drop stale ppc64 from the kabidw-base arch list (Jan Stancek)
+- redhat: document the kabichk force-off as a seasonal toggle (Jan Stancek)
+- redhat: use one spelling for the include and gemini conditionals (Jan Stancek)
+- redhat: remove unused elf_image_install_path and duplicate defines (Jan Stancek)
+- redhat: drop the dead kernel-tools __requires_exclude python filter (Jan Stancek)
+- redhat: drop the Fedora 41 cross-build gdb-index workaround (Jan Stancek)
+- redhat: drop stale build switches from dist-perf and dist-rpm-baseonly (Jan Stancek)
+- redhat: give kernel-automotive its own summary (Jan Stancek)
+- redhat: drop leftover kernel_kvm_post calls for rt-64k (Jan Stancek)
+- redhat: restore missing summary of the kernel-debug variant (Jan Stancek)
+- redhat: fix parse error in baseonly sanity check message (Jan Stancek)
+- Linux v7.2.1
 Resolves: 
 
 * Mon Aug 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-60]

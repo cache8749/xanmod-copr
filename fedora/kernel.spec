@@ -122,6 +122,11 @@ Summary: The Linux kernel
 %global signkernel 0
 %endif
 
+# Arches whose kernels ship device tree blobs
+%global dtb_arches aarch64 riscv64
+# Arches that build the EFI unified kernel images
+%global uki_arches x86_64 aarch64 riscv64
+
 # RHEL/CentOS specific .SBAT entries
 %if 0%{?centos}
 %global sbat_suffix centos
@@ -178,7 +183,7 @@ Summary: The Linux kernel
 #  kernel release. (This includes prepatch or "rc" releases.)
 # Set released_kernel to 0 when the upstream source tarball contains an
 #  unreleased kernel development snapshot.
-%global released_kernel 0
+%global released_kernel 1
 # Set debugbuildsenabled to 1 to build separate base and debug kernels
 #  (on supported architectures). The kernel-debug-* subpackages will
 #  contain the debug kernel.
@@ -187,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.0
-%define specversion 7.2.0
+%define specrpmversion 7.2.1
+%define specversion 7.2.1
 %define patchversion 7.2
-%define pkgrelease 61
+%define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2
+%define tarfile_release 7.2.1
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 61%{?buildid}%{?dist}
+%define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.0
+%define kabiversion 7.2.1
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -305,7 +310,9 @@ Summary: The Linux kernel
 %define with_toolsonly %{?_with_toolsonly:    1} %{?!_with_toolsonly:    0}
 # Control whether we perform a compat. check against published ABI.
 %define with_kabichk   %{?_without_kabichk:   0} %{?!_without_kabichk:   1}
-# Temporarily disable kabi checks until RC.
+# Seasonal toggle, not dead code: flipped off after a rebase and back on
+# once the kABI stablelists are updated for the new release (at RC).
+# While 0, it also forces with_kabidupchk and with_kabidwchk off below.
 %define with_kabichk 0
 # Control whether we perform a compat. check against DUP ABI.
 %define with_kabidupchk %{?_with_kabidupchk:  1} %{?!_with_kabidupchk:   0}
@@ -341,7 +348,7 @@ Summary: The Linux kernel
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
 
-%ifarch x86_64 aarch64 riscv64
+%ifarch %{uki_arches}
 %define with_efiuki %{?_without_efiuki: 0} %{?!_without_efiuki: 1}
 %else
 %define with_efiuki 0
@@ -515,8 +522,6 @@ Summary: The Linux kernel
 %define with_kabidwchk 0
 %define with_kabidw_base 0
 %define with_kernel_abi_stablelists 0
-%define with_selftests 0
-%define with_vdso_install 0
 %define with_configchecks 0
 %endif
 
@@ -645,7 +650,6 @@ Summary: The Linux kernel
 %define hdrarch powerpc
 %define make_target vmlinux
 %define kernel_image vmlinux
-%define kernel_image_elf 1
 %define use_vdso 0
 %endif
 
@@ -934,16 +938,6 @@ BuildRequires: pesign >= 0.10-4
 BuildRequires: binutils-%{_build_arch}-linux-gnu, gcc-%{_build_arch}-linux-gnu
 %define cross_opts CROSS_COMPILE=%{_build_arch}-linux-gnu-
 %define __strip %{_build_arch}-linux-gnu-strip
-
-%if 0%{?fedora} && 0%{?fedora} <= 41
-# Work around find-debuginfo for cross builds.
-# find-debuginfo doesn't support any of CROSS options (RHEL-21797),
-# and since debugedit > 5.0-16.el10, or since commit
-#   dfe1f7ff30f4 ("find-debuginfo.sh: Exit with real exit status in parallel jobs")
-# it now aborts on failure and build fails.
-# debugedit-5.1-5 in F42 added support to override tools with target versions.
-%undefine _include_gdb_index
-%endif
 %endif
 
 # These below are required to build man pages
@@ -1066,7 +1060,7 @@ Source44: %{name}-riscv64-rhel.config
 Source45: %{name}-riscv64-debug-rhel.config
 %endif
 
-%if %{include_rhel} || %{include_automotive}
+%if 0%{?include_rhel} || 0%{?include_automotive}
 Source23: x509.genkey.rhel
 Source34: def_variants.yaml.rhel
 Source41: x509.genkey.centos
@@ -1160,8 +1154,8 @@ Source214: Module.kabi_dup_riscv64
 Source300: kernel-abi-stablelists-%{kabiversion}.tar.xz
 Source301: kernel-kabi-dw-%{kabiversion}.tar.xz
 
-%if 0%{include_rt}
-%if 0%{include_rhel}
+%if 0%{?include_rt}
+%if 0%{?include_rhel}
 Source474: %{name}-aarch64-rt-rhel.config
 Source475: %{name}-aarch64-rt-debug-rhel.config
 Source476: %{name}-aarch64-rt-64k-rhel.config
@@ -1169,7 +1163,7 @@ Source477: %{name}-aarch64-rt-64k-debug-rhel.config
 Source478: %{name}-x86_64-rt-rhel.config
 Source479: %{name}-x86_64-rt-debug-rhel.config
 %endif
-%if 0%{include_fedora}
+%if 0%{?include_fedora}
 Source480: %{name}-aarch64-rt-fedora.config
 Source481: %{name}-aarch64-rt-debug-fedora.config
 Source482: %{name}-aarch64-rt-64k-fedora.config
@@ -1181,7 +1175,7 @@ Source487: %{name}-riscv64-rt-debug-fedora.config
 %endif
 %endif
 
-%if %{include_automotive}
+%if 0%{?include_automotive}
 %if %{with_automotive_build}
 Source488: %{name}-aarch64-rhel.config
 Source489: %{name}-aarch64-debug-rhel.config
@@ -1320,7 +1314,7 @@ It provides the kernel source files common to all builds.
 
 %if %{with_perf}
 %package -n perf
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Performance monitoring for the Linux kernel
@@ -1330,7 +1324,7 @@ This package contains the perf tool, which enables performance monitoring
 of the Linux kernel.
 
 %package -n perf-debuginfo
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Debug information for package perf
@@ -1346,7 +1340,7 @@ This package provides debug information for the perf package.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/libperf-jvmti.so(\.debug)?|XXX' -o perf-debuginfo.list}
 
 %package -n python3-perf
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Python bindings for apps which will manipulate perf events
@@ -1356,7 +1350,7 @@ written in the Python programming language to use the interface
 to manipulate perf events.
 
 %package -n python3-perf-debuginfo
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Debug information for package perf python bindings
@@ -1413,7 +1407,6 @@ Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
 Requires: %{name}-tools-libs = %{specrpmversion}-%{release}
 %endif
-%define __requires_exclude ^%{_bindir}/python
 %description -n %{name}-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
@@ -1459,7 +1452,7 @@ shipped as part of the kernel tools including ynl.
 %endif
 
 %package -n rtla
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Real-Time Linux Analysis tools
@@ -1477,7 +1470,7 @@ about the properties and root causes of unexpected results.
 
 %if %{with_debuginfo}
 %package -n rtla-debuginfo
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Debug information for package rtla
@@ -1494,7 +1487,7 @@ This package provides debug information for the rtla package.
 %endif
 
 %package -n rv
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: RV: Runtime Verification
@@ -1508,7 +1501,7 @@ to analyze the logical and timing behavior of Linux.
 
 %if %{with_debuginfo}
 %package -n rv-debuginfo
-%if 0%{gemini}
+%if 0%{?gemini}
 Epoch: %{gemini}
 %endif
 Summary: Debug information for package rv
@@ -1996,7 +1989,7 @@ on kernel bugs, as some of these options impact performance noticably.
 %endif
 
 %if %{with_debug} && %{with_automotive} && !%{with_automotive_build}
-%define variant_summary The Linux Automotive kernel compiled with extra debugging enabled
+%define variant_summary The Linux kernel compiled for Automotive use with PREEMPT_RT and extra debugging enabled
 %kernel_variant_package automotive-debug
 %description automotive-debug-core
 The kernel package contains the Linux kernel (vmlinuz), the core of any
@@ -2010,7 +2003,7 @@ on kernel bugs, as some of these options impact performance noticably.
 %endif
 
 %if %{with_automotive_base}
-%define variant_summary The Linux kernel compiled with PREEMPT_RT enabled
+%define variant_summary The Linux kernel compiled for Automotive use with PREEMPT_RT enabled
 %kernel_variant_package automotive
 %description automotive-core
 This package includes a version of the Linux kernel compiled with the
@@ -2018,6 +2011,7 @@ PREEMPT_RT real-time preemption support, targeted for Automotive platforms
 %endif
 
 %if %{with_stock} && %{with_debug}
+%define variant_summary The Linux kernel compiled with extra debugging enabled
 %if !%{debugbuildsenabled}
 %kernel_variant_package -m debug
 %else
@@ -2126,7 +2120,7 @@ Prebuilt default kernel image with auto DTB selection for ARM64 UEFI devices.
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
 %if !%{with_stock}
-%{log_msg "Cannot build --with baseonly, stock build is disabled"}
+%{log_msg "Cannot build with baseonly, stock build is disabled"}
 exit 1
 %endif
 %endif
@@ -2550,7 +2544,7 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT%{debuginfodir}/%{image_install_path}
 %endif
 
-%ifarch aarch64 riscv64
+%ifarch %{dtb_arches}
     %{log_msg "Build dtb kernel"}
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     %{make} ARCH=$Arch dtbs INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
@@ -4529,13 +4523,11 @@ fi\
 %if %{with_realtime_arm64_64k_base}
 %kernel_variant_preun -v rt-64k
 %kernel_variant_post -v rt-64k
-%kernel_kvm_post rt-64k
 %endif
 
 %if %{with_debug} && %{with_realtime_arm64_64k}
 %kernel_variant_preun -v rt-64k-debug
 %kernel_variant_post -v rt-64k-debug
-%kernel_kvm_post rt-64k-debug
 %endif
 
 %if %{with_automotive} && %{with_debug} && !%{with_automotive_build}
@@ -4567,7 +4559,7 @@ fi\
 %endif
 
 %if %{with_kabidw_base}
-%ifarch x86_64 s390x ppc64 ppc64le aarch64 riscv64
+%ifarch x86_64 s390x ppc64le aarch64 riscv64
 %files kernel-kabidw-base-internal
 %defattr(-,root,root)
 /kabidw-base/%{_target_cpu}/*
@@ -4768,14 +4760,10 @@ fi\
 
 # empty meta-package
 %if %{with_stock_base}
-%ifnarch %nobuildarches noarch
+%ifnarch noarch %{nobuildarches}
 %files
 %endif
 %endif
-
-# This is %%{image_install_path} on an arch where that includes ELF files,
-# or empty otherwise.
-%define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
 
 #
 # This macro defines the %%files sections for a kernel package
@@ -4809,7 +4797,7 @@ fi\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
 %ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
-%ifarch aarch64 riscv64\
+%ifarch %{dtb_arches}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/dtb \
 %ghost /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
@@ -4899,7 +4887,7 @@ fi\
 %ghost %attr(0644, root, root) /boot/symvers-%{KVERREL}%{?3:+%{3}}.%compext\
 %ghost %attr(0755, root, root) /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 %ghost %attr(0644, root, root) /%{image_install_path}/.%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}.hmac\
-%ifarch aarch64 riscv64\
+%ifarch %{dtb_arches}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/dtb \
 %ghost /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
@@ -4908,7 +4896,7 @@ fi\
 %{expand:%%files %{3}}\
 %endif\
 %if %{with_gcov}\
-%ifnarch %nobuildarches noarch\
+%ifnarch noarch %{nobuildarches}\
 %{expand:%%files -f kernel-%{?3:%{3}-}gcov.list %{?3:%{3}-}gcov}\
 %endif\
 %endif\
@@ -4976,8 +4964,25 @@ fi\
 #
 #
 %changelog
-* Mon Aug 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-61]
-- automotive: enable HUGETLBFS to workaround build error (Scott Weaver)
+* Thu Aug 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.1-0]
+- Initial setup for stable Fedora release (Justin M. Forbes)
+- Reset Makefile.rhelver for the 7.3 cycle (Justin M. Forbes)
+- Merge configs into common for 7.2 (Justin M. Forbes)
+- redhat/configs: automotive: enable RTC_DRV_PL031 (Eric Chanudet)
+- redhat: name the dtb and UKI arch lists (Jan Stancek)
+- redhat: use one spelling for the nobuildarches files guard (Jan Stancek)
+- redhat: drop stale ppc64 from the kabidw-base arch list (Jan Stancek)
+- redhat: document the kabichk force-off as a seasonal toggle (Jan Stancek)
+- redhat: use one spelling for the include and gemini conditionals (Jan Stancek)
+- redhat: remove unused elf_image_install_path and duplicate defines (Jan Stancek)
+- redhat: drop the dead kernel-tools __requires_exclude python filter (Jan Stancek)
+- redhat: drop the Fedora 41 cross-build gdb-index workaround (Jan Stancek)
+- redhat: drop stale build switches from dist-perf and dist-rpm-baseonly (Jan Stancek)
+- redhat: give kernel-automotive its own summary (Jan Stancek)
+- redhat: drop leftover kernel_kvm_post calls for rt-64k (Jan Stancek)
+- redhat: restore missing summary of the kernel-debug variant (Jan Stancek)
+- redhat: fix parse error in baseonly sanity check message (Jan Stancek)
+- Linux v7.2.1
 
 * Mon Aug 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-60]
 - dracut-virt.conf: change systemd-pcrphase to systemd-pcrextend (Vitaly Kuznetsov)
