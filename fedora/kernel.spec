@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.1
-%define specversion 7.2.1
+%define specrpmversion 7.2.2
+%define specversion 7.2.2
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.1
+%define tarfile_release 7.2.2
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.1
+%define kabiversion 7.2.2
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,6 +4964,9 @@ fi\
 #
 #
 %changelog
+* Fri Aug 28 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.2-0]
+- Linux v7.2.2
+
 * Thu Aug 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.1-0]
 - Initial setup for stable Fedora release (Justin M. Forbes)
 - Reset Makefile.rhelver for the 7.3 cycle (Justin M. Forbes)

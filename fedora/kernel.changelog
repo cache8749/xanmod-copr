@@ -1,3 +1,7 @@
+* Fri Aug 28 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.2-0]
+- Linux v7.2.2
+Resolves: 
+
 * Thu Aug 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.1-0]
 - Initial setup for stable Fedora release (Justin M. Forbes)
 - Reset Makefile.rhelver for the 7.3 cycle (Justin M. Forbes)
