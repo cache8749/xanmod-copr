@@ -100,16 +100,32 @@ import re, sys
 xanmod_path, fedora_path = sys.argv[1], sys.argv[2]
 SET = re.compile(r"^(CONFIG_\w+)=")
 NOTSET = re.compile(r"^#\s+(CONFIG_\w+)\s+is not set$")
+ARCH_MARKER = re.compile(r"^# (\w+)$")
 
 def symbol(line):
     m = SET.match(line) or NOTSET.match(line)
     return m.group(1) if m else None
 
+fedora_lines = open(fedora_path).read().splitlines()
+
+# Line 1 of a dist-git config is the arch, and it is load-bearing: InitBuildVars
+# does `Arch=`head -1 .config | cut -b 3-`` and passes it as make ARCH=. Drop it and
+# make sees an empty ARCH, which is not the same as an unset one - the Makefile's
+# `ARCH ?= $(SUBARCH)` fallback never fires and the build dies on `arch//Makefile`.
+m = ARCH_MARKER.match(fedora_lines[0]) if fedora_lines else None
+if not m or symbol(fedora_lines[0]):
+    sys.exit(
+        f"ERROR: {fedora_path.split('/')[-1]} does not start with an arch marker "
+        f"(got {fedora_lines[0]!r} instead of '# x86_64') - Fedora changed how the "
+        "spec finds ARCH."
+    )
+arch_marker = fedora_lines[0]
+
 fedora = {}
-for line in open(fedora_path):
-    s = symbol(line.rstrip("\n"))
+for line in fedora_lines:
+    s = symbol(line)
     if s:
-        fedora[s] = line.rstrip("\n")
+        fedora[s] = line
 
 # Symbols Fedora's *packaging* owns. Everything else - including the x86-64-v3 ISA
 # level and every tuning choice - is taken from XanMod verbatim.
@@ -138,7 +154,7 @@ REQUIRE = {
     "CONFIG_DEBUG_INFO_BTF": "y",
 }
 
-out, seen, changes = [], set(), []
+out, seen, changes = [arch_marker], set(), []
 for line in open(xanmod_path):
     line = line.rstrip("\n")
     s = symbol(line)
@@ -166,6 +182,7 @@ for s, v in REQUIRE.items():
 
 open(fedora_path, "w").write("\n".join(out) + "\n")
 print(f"  {len(seen)} symbols from XanMod -> {fedora_path.split('/')[-1]}")
+print(f"  kept Fedora's arch marker as line 1: {arch_marker}")
 print("  kept from Fedora for packaging reasons:")
 for c in changes:
     print(f"    {c}")

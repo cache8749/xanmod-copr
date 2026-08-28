@@ -109,6 +109,10 @@ def main():
         (r"^mv linux-%\{tarfile_release\} linux-%\{KVERREL\}$", "source dir rename"),
         (r"^Source3001: kernel-local$", "kernel-local config hook"),
         (r"^Source2: %\{name\}\.changelog$", "changelog naming"),
+        # tools/assemble.sh keeps the arch marker on line 1 of the config it
+        # generates because of this line. An empty ARCH= reaches make as
+        # defined-but-empty and the build dies on arch//Makefile.
+        (r"^\s*Arch=`head -1 \.config \| cut -b 3-`$", "ARCH read from config line 1"),
     ):
         if not re.search(needed, spec, flags=re.M):
             sys.exit(
