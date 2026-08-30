@@ -39,6 +39,13 @@ OVERRIDES = """\
 # build time and nobody debugs this kernel with them.
 %define _without_debug 1
 %define _without_debuginfo 1
+# Selftests are QA scaffolding for Fedora's gating, not something a copr kernel
+# ships to anyone, and they are slow. They also cannot coexist with
+# _without_debuginfo: Fedora generates vmlinux.h only under %%if %%{{with_debuginfo}},
+# the bpf selftests then build against an empty VMLINUX_H and fail, kselftests
+# swallows the failure (FORCE_TARGETS is off), and %%install dies on the
+# unconditional `cp ./bpf/tools/sbin/bpftool`.
+%define _without_selftests 1
 # kernel-xanmod-rt. Fedora defaults realtime off and only builds it on request;
 # the rt configs themselves ship in dist-git either way.
 %define _with_realtime 1
