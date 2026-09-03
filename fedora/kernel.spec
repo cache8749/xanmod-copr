@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.2
-%define specversion 7.2.2
+%define specrpmversion 7.2.3
+%define specversion 7.2.3
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.2
+%define tarfile_release 7.2.3
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.2
+%define kabiversion 7.2.3
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,6 +4964,24 @@ fi\
 #
 #
 %changelog
+* Wed Sep 02 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.3-0]
+- Bluetooth: btusb: limit RTL8761B BROKEN_EXT_SCAN quirk to 0bda:a728 (Junjie Cao)
+- ACPI: scan: Do not combine resources that overlap completely (Rafael J. Wysocki)
+- ACPI: scan: Avoid registering platform devices with resource overlaps (Rafael J. Wysocki)
+- page_pool: keep frag_offset aligned for odd-sized requests (Florian Schauer) [2521546 2521847]
+- media: i2c: cvs: Pass link frequency explicitly to csi_set_link_cfg() (Laurent Pinchart)
+- media: i2c: cvs: Add NVL ACPI ID (Arun T)
+- media: i2c: cvs: Add IPU8 PCI device ID (Arun T)
+- random: Drop the extrng module reference when import_ubuf() fails (Junjie Cao) [2524262]
+- Add mechanism to back out the af_alg_restrict sysctl (Justin M. Forbes)
+- crypto: af_alg - Stop after finding name in allowlist (Eric Biggers)
+- crypto: af_alg - Replace 'bool privileged' with flags (Eric Biggers)
+- crypto: af_alg - Make cbc(paes) privileged-only (Eric Biggers)
+- crypto: af_alg - clean up kernel-doc warnings (Randy Dunlap)
+- crypto: af_alg - Allow additional ciphers for cryptsetup (Eric Biggers)
+- crypto: af_alg - Add af_alg_restrict sysctl, defaulting to 1 (Eric Biggers)
+- Linux v7.2.3
+
 * Fri Aug 28 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.2-0]
 - Linux v7.2.2
 

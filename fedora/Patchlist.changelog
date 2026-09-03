@@ -1,3 +1,45 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/e8406125b1518ccea6da3a6d24c083d1266e86c2
+ e8406125b1518ccea6da3a6d24c083d1266e86c2 Bluetooth: btusb: limit RTL8761B BROKEN_EXT_SCAN quirk to 0bda:a728
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/6a286cd1edf4510f39fa76e9e9c74578dd6d066a
+ 6a286cd1edf4510f39fa76e9e9c74578dd6d066a ACPI: scan: Do not combine resources that overlap completely
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c83e3a20e2c864a3a262a68715b003e34cd83693
+ c83e3a20e2c864a3a262a68715b003e34cd83693 ACPI: scan: Avoid registering platform devices with resource overlaps
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a3cf371d7ad3947bc73d6fb68226f2cb93b4e703
+ a3cf371d7ad3947bc73d6fb68226f2cb93b4e703 page_pool: keep frag_offset aligned for odd-sized requests
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/16fd65fad1784d16d1e38ca90bf672fe6dbd3703
+ 16fd65fad1784d16d1e38ca90bf672fe6dbd3703 media: i2c: cvs: Pass link frequency explicitly to csi_set_link_cfg()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dd40a4985ebc29b4d1e12960b4e7cf715128722b
+ dd40a4985ebc29b4d1e12960b4e7cf715128722b media: i2c: cvs: Add NVL ACPI ID
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2aafb1ce0a15a4453bcb2b6501e2b759c6558a7d
+ 2aafb1ce0a15a4453bcb2b6501e2b759c6558a7d media: i2c: cvs: Add IPU8 PCI device ID
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2efed24569953e88ce1f9a6ed579a71bafece833
+ 2efed24569953e88ce1f9a6ed579a71bafece833 random: Drop the extrng module reference when import_ubuf() fails
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e597dba8c0eb131768f5aa3498822d52c6cb356a
+ e597dba8c0eb131768f5aa3498822d52c6cb356a crypto: af_alg - Stop after finding name in allowlist
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dfb9f20d58fe088049b7a4e5f7b0597fbe39a76d
+ dfb9f20d58fe088049b7a4e5f7b0597fbe39a76d crypto: af_alg - Replace 'bool privileged' with flags
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9ce90cf073745eb142bfe1669e9b8f6625a763b6
+ 9ce90cf073745eb142bfe1669e9b8f6625a763b6 crypto: af_alg - Make cbc(paes) privileged-only
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/76bcc03f09041646f7bdcf3020b756b5bd8e09db
+ 76bcc03f09041646f7bdcf3020b756b5bd8e09db crypto: af_alg - clean up kernel-doc warnings
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/13d0095a68c6be26a179e14df996cab6be9ee9f1
+ 13d0095a68c6be26a179e14df996cab6be9ee9f1 crypto: af_alg - Allow additional ciphers for cryptsetup
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e5a7d83cf810d0227ce161a6b2a94a1897f843ce
+ e5a7d83cf810d0227ce161a6b2a94a1897f843ce crypto: af_alg - Add af_alg_restrict sysctl, defaulting to 1
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/d088d8766e390303a72e82a86d2970f17e6846df
  d088d8766e390303a72e82a86d2970f17e6846df redhat: Add DENYLIST.rhel to BPF selftests
 
