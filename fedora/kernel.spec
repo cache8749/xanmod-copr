@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.3
-%define specversion 7.2.3
+%define specrpmversion 7.2.4
+%define specversion 7.2.4
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.3
+%define tarfile_release 7.2.4
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.3
+%define kabiversion 7.2.4
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,6 +4964,11 @@ fi\
 #
 #
 %changelog
+* Mon Sep 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.4-0]
+- Remove unnecessary config file for Fedora (Justin M. Forbes)
+- Add F43 and F44 to release_targets (Justin M. Forbes)
+- Linux v7.2.4
+
 * Wed Sep 02 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.3-0]
 - Bluetooth: btusb: limit RTL8761B BROKEN_EXT_SCAN quirk to 0bda:a728 (Junjie Cao)
 - ACPI: scan: Do not combine resources that overlap completely (Rafael J. Wysocki)

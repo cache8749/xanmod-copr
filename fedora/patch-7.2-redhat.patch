@@ -18,13 +18,10 @@
  crypto/seqiv.c                                     |  15 ++-
  crypto/sig.c                                       |   3 +-
  crypto/testmgr.c                                   |   6 +-
- drivers/acpi/acpi_platform.c                       |  45 +++++++-
  drivers/acpi/apei/hest.c                           |   8 ++
  drivers/acpi/irq.c                                 |  17 ++-
  drivers/acpi/scan.c                                |   9 ++
  drivers/ata/libahci.c                              |  18 +++
- drivers/bluetooth/btrtl.c                          |  13 ---
- drivers/bluetooth/btusb.c                          |   8 ++
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +++
  drivers/char/ipmi/ipmi_msghandler.c                |  16 ++-
  drivers/char/random.c                              | 128 ++++++++++++++++++++-
@@ -56,7 +53,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++++++++++++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -----
- 58 files changed, 979 insertions(+), 159 deletions(-)
+ 55 files changed, 928 insertions(+), 144 deletions(-)
 
 diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
 index b707bd314a64..9a1bd53287f4 100644
@@ -134,7 +131,7 @@ index ab93300c8e04..d6194346e366 100644
  Deprecation
  -----------
 diff --git a/Makefile b/Makefile
-index 150b1c1d7bed..de832cf47e7b 100644
+index 91d6e74db4dc..da3ae4b426e4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -155,7 +152,7 @@ index 150b1c1d7bed..de832cf47e7b 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1432,6 +1443,8 @@ uapi-asm-generic:
+@@ -1443,6 +1454,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -164,7 +161,7 @@ index 150b1c1d7bed..de832cf47e7b 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -2108,6 +2121,23 @@ endif
+@@ -2119,6 +2132,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -189,7 +186,7 @@ index 150b1c1d7bed..de832cf47e7b 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 9187240a02db..46d1258700af 100644
+index b8aa3fcce107..27f335712a67 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1216,9 +1216,9 @@ config HIGHMEM
@@ -780,78 +777,6 @@ index 4958211fbfa9..ee6d34885696 100644
  		.suite = {
  			.kpp = __VECS(ecdh_p384_tv_template)
  		}
-diff --git a/drivers/acpi/acpi_platform.c b/drivers/acpi/acpi_platform.c
-index a09636a4168e..e3c77a65f61c 100644
---- a/drivers/acpi/acpi_platform.c
-+++ b/drivers/acpi/acpi_platform.c
-@@ -12,6 +12,7 @@
- #include <linux/bits.h>
- #include <linux/device.h>
- #include <linux/err.h>
-+#include <linux/ioport.h>
- #include <linux/kernel.h>
- #include <linux/module.h>
- #include <linux/dma-mapping.h>
-@@ -71,6 +72,42 @@ static struct notifier_block acpi_platform_notifier = {
- 	.notifier_call = acpi_platform_device_remove_notify,
- };
- 
-+static unsigned int acpi_platform_adjust_resources(struct acpi_device *adev,
-+						   struct resource *new_res,
-+						   struct resource *resources,
-+						   unsigned int count)
-+{
-+	unsigned int i;
-+
-+	if (!(new_res->flags & (IORESOURCE_IO | IORESOURCE_MEM)))
-+		return count;
-+
-+	for (i = 0; i < count; ) {
-+		struct resource *res = &resources[i];
-+
-+		/*
-+		 * Look for overlaps of resources of the same type that would
-+		 * cause resource insertion to fail down the road.
-+		 */
-+		if (__resource_contains_unbound(res, new_res) ||
-+		    __resource_contains_unbound(new_res, res) ||
-+		    resource_type(new_res) != resource_type(res) ||
-+		    !resource_union(new_res, res, new_res)) {
-+			i++;
-+			continue;
-+		}
-+
-+		dev_info(&adev->dev, "%pR expanded due to overlap\n", new_res);
-+		/*
-+		 * Eliminate the previously processed resource that overlapped
-+		 * with the new one because it is not necessary any more.
-+		 */
-+		memmove(res, res + 1, (--count - i) * sizeof(*res));
-+	}
-+
-+	return count;
-+}
-+
- static void acpi_platform_fill_resource(struct acpi_device *adev,
- 	const struct resource *src, struct resource *dest)
- {
-@@ -151,10 +188,14 @@ struct platform_device *acpi_create_platform_device(struct acpi_device *adev,
- 				return ERR_PTR(-ENOMEM);
- 			}
- 			count = 0;
--			list_for_each_entry(rentry, &resource_list, node)
-+			list_for_each_entry(rentry, &resource_list, node) {
-+				count = acpi_platform_adjust_resources(adev,
-+								       rentry->res,
-+								       resources,
-+								       count);
- 				acpi_platform_fill_resource(adev, rentry->res,
- 							    &resources[count++]);
--
-+			}
- 			acpi_dev_free_resource_list(&resource_list);
- 		}
- 	}
 diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
 index 20d757687e3d..90a13f20f052 100644
 --- a/drivers/acpi/apei/hest.c
@@ -963,63 +888,6 @@ index 6d72eb017b49..0a6701eb8d37 100644
  	/* wait for engine to stop. This could be as long as 500 msec */
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
-diff --git a/drivers/bluetooth/btrtl.c b/drivers/bluetooth/btrtl.c
-index 7f54d2d2d13a..03fa9409e3ee 100644
---- a/drivers/bluetooth/btrtl.c
-+++ b/drivers/bluetooth/btrtl.c
-@@ -1343,19 +1343,6 @@ void btrtl_set_quirks(struct hci_dev *hdev, struct btrtl_device_info *btrtl_dev)
- 	if (!btrtl_dev->ic_info)
- 		return;
- 
--	switch (btrtl_dev->project_id) {
--	case CHIP_ID_8761B:
--		/* RTL8761B/BU reports HCI version 5.1 but does not support
--		 * the LE Extended Scan commands (Opcode 0x2042), causing
--		 * repeated -EBUSY failures when BlueZ attempts extended
--		 * scanning while a connection is active.
--		 */
--		hci_set_quirk(hdev, HCI_QUIRK_BROKEN_EXT_SCAN);
--		break;
--	default:
--		break;
--	}
--
- 	switch (btrtl_dev->ic_info->lmp_subver) {
- 	case RTL_ROM_LMP_8703B:
- 		/* 8723CS reports two pages for local ext features,
-diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
-index 184e95c1625e..adee77ebd9aa 100644
---- a/drivers/bluetooth/btusb.c
-+++ b/drivers/bluetooth/btusb.c
-@@ -67,6 +67,7 @@ static struct usb_driver btusb_driver;
- #define BTUSB_INTEL_NO_WBS_SUPPORT	BIT(26)
- #define BTUSB_ACTIONS_SEMI		BIT(27)
- #define BTUSB_BARROT			BIT(28)
-+#define BTUSB_BROKEN_EXT_SCAN		BIT(29)
- 
- static const struct usb_device_id btusb_table[] = {
- 	/* Generic Bluetooth USB device */
-@@ -615,6 +616,10 @@ static const struct usb_device_id quirks_table[] = {
- 	{ USB_DEVICE(0x0489, 0xe130), .driver_info = BTUSB_REALTEK |
- 						     BTUSB_WIDEBAND_SPEECH },
- 
-+	/* Realtek 8761BU Bluetooth devices */
-+	{ USB_DEVICE(0x0bda, 0xa728), .driver_info = BTUSB_REALTEK |
-+						     BTUSB_BROKEN_EXT_SCAN },
-+
- 	/* Realtek Bluetooth devices */
- 	{ USB_VENDOR_AND_INTERFACE_INFO(0x0bda, 0xe0, 0x01, 0x01),
- 	  .driver_info = BTUSB_REALTEK },
-@@ -4366,6 +4371,9 @@ static int btusb_probe(struct usb_interface *intf,
- 	if (id->driver_info & BTUSB_INVALID_LE_STATES)
- 		hci_set_quirk(hdev, HCI_QUIRK_BROKEN_LE_STATES);
- 
-+	if (id->driver_info & BTUSB_BROKEN_EXT_SCAN)
-+		hci_set_quirk(hdev, HCI_QUIRK_BROKEN_EXT_SCAN);
-+
- 	if (id->driver_info & BTUSB_DIGIANSWER) {
- 		data->cmdreq_type = USB_TYPE_VENDOR;
- 		hci_set_quirk(hdev, HCI_QUIRK_RESET_ON_CLOSE);
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
 index 505e32911c34..26f7ee0ccf40 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
@@ -1047,7 +915,7 @@ index 505e32911c34..26f7ee0ccf40 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index ab4c85f3d6fe..92de1165f6ef 100644
+index 0330d8412a0e..46babed7a863 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1058,7 +926,7 @@ index ab4c85f3d6fe..92de1165f6ef 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5643,8 +5644,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5647,8 +5648,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
@@ -1599,7 +1467,7 @@ index 14bb31bd6a0b..0529359d7440 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index e8f13dcebbde..dd7014ca962c 100644
+index 23a531595835..2f8952a08112 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1751,10 +1619,10 @@ index 3a1ec0059ef7..9fadca7a3bee 100644
  
  	return 0;
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index b09f27f7846f..b54fe538511a 100644
+index 0500d5fd4f11..b13589a0860e 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4496,6 +4496,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
+@@ -4499,6 +4499,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
  }
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ASPEED, 0x1150, quirk_aspeed_pci_bridge_no_alias);
  
