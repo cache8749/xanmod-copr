@@ -1,3 +1,21 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/1d465dd5a33c5477835471da15f11547a8b5ae5f
+ 1d465dd5a33c5477835471da15f11547a8b5ae5f media: ipu-bridge: Add Sony IMX471 for Lenovo X1 Carbon G14
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/6bacf6aefa05430523eb895588a472f3358cffca
+ 6bacf6aefa05430523eb895588a472f3358cffca media: ipu-bridge: Add DMI information of Lenovo X9 to the image upside-down list
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/598b1ebda96c8c84031813ce3fe265b19cf3fb98
+ 598b1ebda96c8c84031813ce3fe265b19cf3fb98 media: i2c: imx471: Fix uninitialized error value in imx471_set_ctrl()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/43fc8de53d62ace079572533a1c92c1ce16b3f2a
+ 43fc8de53d62ace079572533a1c92c1ce16b3f2a media: i2c: imx471: Add Sony IMX471 image sensor driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dd9af2ae6de3d3313ef492dae26a14cd4d59ba8e
+ dd9af2ae6de3d3313ef492dae26a14cd4d59ba8e Input: soc_button_array - check btns_desc->package.count
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3ba796e00e35e1ab65fc0d3644b6c114216a0354
+ 3ba796e00e35e1ab65fc0d3644b6c114216a0354 Input: soc_button_array - fix MS Surface Pro 11 probe failure
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/e8406125b1518ccea6da3a6d24c083d1266e86c2
  e8406125b1518ccea6da3a6d24c083d1266e86c2 Bluetooth: btusb: limit RTL8761B BROKEN_EXT_SCAN quirk to 0bda:a728
 
