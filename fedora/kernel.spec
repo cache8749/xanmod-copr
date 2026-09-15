@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.5
-%define specversion 7.2.5
+%define specrpmversion 7.2.6
+%define specversion 7.2.6
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.5
+%define tarfile_release 7.2.6
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.5
+%define kabiversion 7.2.6
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,8 +4964,19 @@ fi\
 #
 #
 %changelog
-* Fri Sep 11 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.5-300]
+* Mon Sep 14 2026 Augusto Caringi <acaringi@redhat.com> [7.2.6-300]
+- redhat: configs: fedora: Enable CONFIG_FIREWIRE_KUNIT_NODE_TREE_TEST for x86 (Augusto Caringi)
+
+* Mon Sep 14 2026 Augusto Caringi <acaringi@redhat.com> [7.2.6-0]
+- redhat/configs/fedora: Enable dwc dual-role and ulpi phy support (Hans de Goede)
+- redhat/configs/fedora: Enable some drivers for x86 tablets (Hans de Goede)
+- some BugsFixed for 7.2.6 (Justin M. Forbes)
+- media: i2c: cvs: Get the wake IRQ without claiming the GPIO (Junjie Cao) [2529031]
+- soundwire: dmi-quirks: add Lenovo Yoga Slim 7i 14IPH11 (Sataporn Saijai) [2529315]
+- media: ipu-bridge: do not use the CVS device lookup for IVSC (Sergey Zagursky) [2531810]
+- Switch to NTFS_FS module for Fedora (Justin M. Forbes)
 - BugsFixed and RHEL config for 7.2.5 (Justin M. Forbes)
+- Linux v7.2.6
 
 * Fri Sep 11 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.5-0]
 - redhat: configs: fedora: Enable Sony IMX471 image sensor (Kate Hsuan)

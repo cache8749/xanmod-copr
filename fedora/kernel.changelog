@@ -1,3 +1,15 @@
+* Mon Sep 14 2026 Augusto Caringi <acaringi@redhat.com> [7.2.6-0]
+- redhat/configs/fedora: Enable dwc dual-role and ulpi phy support (Hans de Goede)
+- redhat/configs/fedora: Enable some drivers for x86 tablets (Hans de Goede)
+- some BugsFixed for 7.2.6 (Justin M. Forbes)
+- media: i2c: cvs: Get the wake IRQ without claiming the GPIO (Junjie Cao) [2529031]
+- soundwire: dmi-quirks: add Lenovo Yoga Slim 7i 14IPH11 (Sataporn Saijai) [2529315]
+- media: ipu-bridge: do not use the CVS device lookup for IVSC (Sergey Zagursky) [2531810]
+- Switch to NTFS_FS module for Fedora (Justin M. Forbes)
+- BugsFixed and RHEL config for 7.2.5 (Justin M. Forbes)
+- Linux v7.2.6
+Resolves: rhbz#2529031, rhbz#2529315, rhbz#2531810
+
 * Fri Sep 11 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.5-0]
 - redhat: configs: fedora: Enable Sony IMX471 image sensor (Kate Hsuan)
 - media: ipu-bridge: Add Sony IMX471 for Lenovo X1 Carbon G14 (Kate Hsuan)

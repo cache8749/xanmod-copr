@@ -36,12 +36,13 @@
  drivers/iommu/iommu.c                              |  22 +
  drivers/media/i2c/Kconfig                          |  10 +
  drivers/media/i2c/Makefile                         |   1 +
- drivers/media/i2c/cvs/core.c                       |   3 +
+ drivers/media/i2c/cvs/core.c                       |  19 +-
  drivers/media/i2c/cvs/icvs.h                       |   2 -
  drivers/media/i2c/cvs/v4l2.c                       |  17 +-
  drivers/media/i2c/imx471.c                         | 957 +++++++++++++++++++++
- drivers/media/pci/intel/ipu-bridge.c               |  41 +
+ drivers/media/pci/intel/ipu-bridge.c               |  65 ++
  drivers/pci/quirks.c                               |  24 +
+ drivers/soundwire/dmi-quirks.c                     |   7 +
  drivers/usb/core/hub.c                             |   7 +
  include/crypto/if_alg.h                            |  42 +-
  include/linux/crypto.h                             |   2 +
@@ -59,7 +60,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 61 files changed, 1955 insertions(+), 148 deletions(-)
+ 62 files changed, 1992 insertions(+), 158 deletions(-)
 
 diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
 index b707bd314a64..9a1bd53287f4 100644
@@ -154,7 +155,7 @@ index 8014b9f8253e..62e6c97ee9b2 100644
  M:	Maxim Levitsky <maximlevitsky@gmail.com>
  M:	Alex Dubov <oakad@yahoo.com>
 diff --git a/Makefile b/Makefile
-index 408e8512b713..f1bdadfd7229 100644
+index 73e7bac7527e..abdc7e93fd54 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -209,10 +210,10 @@ index 408e8512b713..f1bdadfd7229 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index b8aa3fcce107..27f335712a67 100644
+index bcb53bc9b931..3eecab4784e9 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1216,9 +1216,9 @@ config HIGHMEM
+@@ -1217,9 +1217,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
@@ -225,7 +226,7 @@ index b8aa3fcce107..27f335712a67 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index b3afe0688919..d23a728aac03 100644
+index fc57d90d92c1..9e96c3e403e8 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1489,7 +1489,7 @@ endchoice
@@ -863,10 +864,10 @@ index d1595156c86a..9485212f1a6d 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 9a7ac2eb9ce0..6556c3d7b269 100644
+index 99af95f33865..2d7e7ff78354 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1794,6 +1794,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1799,6 +1799,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1439,7 +1440,7 @@ index 000000000000..de0a3714a5d4
 +	}
 +}
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 14bb31bd6a0b..0529359d7440 100644
+index 2247ad55d444..5f9da88479e8 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -12,6 +12,7 @@
@@ -1450,7 +1451,7 @@ index 14bb31bd6a0b..0529359d7440 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2447,6 +2448,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2458,6 +2459,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -1467,7 +1468,7 @@ index 14bb31bd6a0b..0529359d7440 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2521,6 +2532,11 @@ static int __init etm4x_init(void)
+@@ -2532,6 +2543,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -1479,7 +1480,7 @@ index 14bb31bd6a0b..0529359d7440 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2547,6 +2563,9 @@ static int __init etm4x_init(void)
+@@ -2558,6 +2574,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -1618,7 +1619,7 @@ index e45359efe0e4..acbd321fc12e 100644
  obj-$(CONFIG_VIDEO_ISL7998X) += isl7998x.o
  obj-$(CONFIG_VIDEO_KS0127) += ks0127.o
 diff --git a/drivers/media/i2c/cvs/core.c b/drivers/media/i2c/cvs/core.c
-index fe9e59ac311c..d4a3b9c3bab1 100644
+index fe9e59ac311c..8d857bbd8ab5 100644
 --- a/drivers/media/i2c/cvs/core.c
 +++ b/drivers/media/i2c/cvs/core.c
 @@ -31,6 +31,7 @@
@@ -1637,7 +1638,37 @@ index fe9e59ac311c..d4a3b9c3bab1 100644
  	{ }
  };
  
-@@ -962,6 +964,7 @@ static const struct acpi_device_id intel_cvs_acpi_match[] = {
+@@ -723,8 +725,6 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
+ 	}
+ 
+ 	if (ctx->res == ICVS_FULLCAP) {
+-		struct gpio_desc *wake;
+-
+ 		ctx->rst = devm_gpiod_get(dev, "rst", GPIOD_OUT_HIGH);
+ 		if (IS_ERR(ctx->rst)) {
+ 			ret = dev_err_probe(dev, PTR_ERR(ctx->rst),
+@@ -732,14 +732,12 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
+ 			goto err_put_ipu;
+ 		}
+ 
+-		wake = devm_gpiod_get(dev, "wake", GPIOD_IN);
+-		if (IS_ERR(wake)) {
+-			ret = dev_err_probe(dev, PTR_ERR(wake),
+-					    "failed to get wake GPIO\n");
+-			goto err_put_ipu;
+-		}
+-
+-		ctx->irq = gpiod_to_irq(wake);
++		/*
++		 * Do not request the line: another device's _CRS may list
++		 * the same pin, and its driver would then fail with -EBUSY.
++		 */
++		ctx->irq = acpi_dev_gpio_irq_get_by(ACPI_COMPANION(dev),
++						    "wake", 0);
+ 		if (ctx->irq < 0) {
+ 			ret = dev_err_probe(dev, ctx->irq,
+ 					    "failed to get wake IRQ\n");
+@@ -962,6 +960,7 @@ static const struct acpi_device_id intel_cvs_acpi_match[] = {
  	{ "INTC10DE" }, /* LNL */
  	{ "INTC10E0" }, /* ARL */
  	{ "INTC10E1" }, /* PTL */
@@ -2693,7 +2724,7 @@ index 000000000000..4053aed84340
 +MODULE_DESCRIPTION("Sony imx471 sensor driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index ad3ddfb9ccb1..0a6d9a9fc040 100644
+index ad3ddfb9ccb1..e87c59c05fbe 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
 @@ -97,6 +97,8 @@ static const struct ipu_sensor_config ipu_supported_sensors[] = {
@@ -2751,6 +2782,44 @@ index ad3ddfb9ccb1..0a6d9a9fc040 100644
  	{} /* Terminating entry */
  };
  
+@@ -173,6 +214,19 @@ static const struct acpi_device_id ivsc_acpi_ids[] = {
+ 	{ "INTC10E1" }, /* PTL */
+ };
+ 
++/*
++ * The subset of ivsc_acpi_ids[] which are IVSC, rather than CVS, devices. The
++ * CVS IDs are deliberately not listed here: new ones keep being added, whereas
++ * this list is complete.
++ */
++static const struct acpi_device_id ivsc_only_acpi_ids[] = {
++	{ "INTC1059" },
++	{ "INTC1095" },
++	{ "INTC100A" },
++	{ "INTC10CF" },
++	{ }
++};
++
+ static struct acpi_device *ipu_bridge_get_ivsc_acpi_dev(struct acpi_device *adev)
+ {
+ 	unsigned int i;
+@@ -224,6 +278,17 @@ static struct device *ipu_bridge_get_ivsc_csi_dev(struct acpi_device *adev)
+ 		return csi_dev;
+ 	}
+ 
++	/*
++	 * The lookups below match on the ACPI companion alone. That is fine for
++	 * CVS, which binds a driver to that very device, but not for IVSC: there
++	 * the ACPI device also has a driverless platform device, which would be
++	 * returned instead of the mei-csi client. Return NULL for IVSC so that
++	 * the caller fails and the probe is retried once the IVSC device shows
++	 * up.
++	 */
++	if (!acpi_match_device_ids(adev, ivsc_only_acpi_ids))
++		return NULL;
++
+ 	/* Try to locate CVS device on the I2C bus */
+ 	csi_dev = bus_find_device_by_acpi_dev(&i2c_bus_type, adev);
+ 	if (csi_dev)
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index 0500d5fd4f11..b13589a0860e 100644
 --- a/drivers/pci/quirks.c
@@ -2786,6 +2855,24 @@ index 0500d5fd4f11..b13589a0860e 100644
  /*
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
+diff --git a/drivers/soundwire/dmi-quirks.c b/drivers/soundwire/dmi-quirks.c
+index 32a46a2d90f7..8f74b0dd2c2a 100644
+--- a/drivers/soundwire/dmi-quirks.c
++++ b/drivers/soundwire/dmi-quirks.c
+@@ -192,6 +192,13 @@ static const struct dmi_system_id adr_remap_quirk_table[] = {
+ 		},
+ 		.driver_data = (void *)ghost_realtek,
+ 	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "83QM"),
++		},
++		.driver_data = (void *)ghost_realtek,
++	},
+ 	{
+ 		.matches = {
+ 			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
 index 068c7bea3102..cecfac2b0bdc 100644
 --- a/drivers/usb/core/hub.c
@@ -2920,7 +3007,7 @@ index b7c97f1c47c9..0a484f45b24a 100644
   * Miscellaneous stuff.
   */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ccbc35479684..8eb9a1276ba7 100644
+index 24221a842412..4b1d4ec2c684 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -3069,10 +3156,10 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/net/core/page_pool.c b/net/core/page_pool.c
-index 21dc4a9c8714..c8331e9cf5d9 100644
+index 8f8956fb061b..08d7f35cf608 100644
 --- a/net/core/page_pool.c
 +++ b/net/core/page_pool.c
-@@ -1063,7 +1063,8 @@ netmem_ref page_pool_alloc_frag_netmem(struct page_pool *pool,
+@@ -1073,7 +1073,8 @@ netmem_ref page_pool_alloc_frag_netmem(struct page_pool *pool,
  	if (WARN_ON(size > max_size))
  		return 0;
  
@@ -3098,7 +3185,7 @@ index 0a4fdd8bd975..dcb12dad419f 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index 243373683f98..2affd5e58ee8 100755
+index c9dc2763a505..17ce478a7ef8 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
@@ -3263,10 +3350,10 @@ index 000000000000..9424a83c6f48
 +test_bpffs                                       # needs CONFIG_BPF_PRELOAD
 +tunnel                                           # needs CONFIG_NET_FOU
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index b642ee489ea6..7e3204186a8b 100644
+index 5ae24ee10100..37b840c46e8b 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -532,7 +532,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -530,7 +530,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
