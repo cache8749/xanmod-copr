@@ -36,12 +36,13 @@
  drivers/iommu/iommu.c                              |  22 +
  drivers/media/i2c/Kconfig                          |  10 +
  drivers/media/i2c/Makefile                         |   1 +
- drivers/media/i2c/cvs/core.c                       |  19 +-
+ drivers/media/i2c/cvs/core.c                       |  26 +-
  drivers/media/i2c/cvs/icvs.h                       |   2 -
  drivers/media/i2c/cvs/v4l2.c                       |  17 +-
  drivers/media/i2c/imx471.c                         | 957 +++++++++++++++++++++
- drivers/media/pci/intel/ipu-bridge.c               |  65 ++
+ drivers/media/pci/intel/ipu-bridge.c               |  48 ++
  drivers/pci/quirks.c                               |  24 +
+ drivers/platform/x86/intel/int3472/discrete.c      | 110 ++-
  drivers/soundwire/dmi-quirks.c                     |   7 +
  drivers/usb/core/hub.c                             |   7 +
  include/crypto/if_alg.h                            |  42 +-
@@ -60,7 +61,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 62 files changed, 1992 insertions(+), 158 deletions(-)
+ 63 files changed, 2052 insertions(+), 198 deletions(-)
 
 diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
 index b707bd314a64..9a1bd53287f4 100644
@@ -138,7 +139,7 @@ index ab93300c8e04..d6194346e366 100644
  Deprecation
  -----------
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 8014b9f8253e..62e6c97ee9b2 100644
+index 95cd976a068c..9717876c5e96 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -25262,6 +25262,12 @@ T:	git git://linuxtv.org/media.git
@@ -155,7 +156,7 @@ index 8014b9f8253e..62e6c97ee9b2 100644
  M:	Maxim Levitsky <maximlevitsky@gmail.com>
  M:	Alex Dubov <oakad@yahoo.com>
 diff --git a/Makefile b/Makefile
-index 73e7bac7527e..abdc7e93fd54 100644
+index c28f11c617a4..19ab705fb38f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -303,10 +304,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 3c346b02ceb9..30e16a0d4490 100644
+index 68fdd5616dfe..c03ebc73a985 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2527,3 +2527,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2533,3 +2533,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -1619,7 +1620,7 @@ index e45359efe0e4..acbd321fc12e 100644
  obj-$(CONFIG_VIDEO_ISL7998X) += isl7998x.o
  obj-$(CONFIG_VIDEO_KS0127) += ks0127.o
 diff --git a/drivers/media/i2c/cvs/core.c b/drivers/media/i2c/cvs/core.c
-index fe9e59ac311c..8d857bbd8ab5 100644
+index fe9e59ac311c..048c87fd9188 100644
 --- a/drivers/media/i2c/cvs/core.c
 +++ b/drivers/media/i2c/cvs/core.c
 @@ -31,6 +31,7 @@
@@ -1638,7 +1639,21 @@ index fe9e59ac311c..8d857bbd8ab5 100644
  	{ }
  };
  
-@@ -723,8 +725,6 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
+@@ -68,6 +70,13 @@ static const struct icvs_device_quirk cvs_quirk_table[] = {
+ 			  ICVS_NO_CAPS |
+ 			  ICVS_NO_FW_UPDATE
+ 	},	/* Lattice NX33 */
++	{ 0x2ac1, 0x20d1, ICVS_NO_MIPI_CONFIG |
++			  ICVS_NO_CAPS |
++			  ICVS_NO_FW_UPDATE
++	},	/*
++		 * The Lattice device was found on a Dell laptop
++		 * XPS 14 (Dell 14 Premium) DA14250
++		 */
+ 	{ 0x06CB, 0x0701, ICVS_SKIP_FW_RESET |
+ 			  ICVS_HOST_SENSOR_PWR_CTRL |
+ 			  ICVS_HOST_PRIV_CTRL |
+@@ -723,8 +732,6 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
  	}
  
  	if (ctx->res == ICVS_FULLCAP) {
@@ -1647,7 +1662,7 @@ index fe9e59ac311c..8d857bbd8ab5 100644
  		ctx->rst = devm_gpiod_get(dev, "rst", GPIOD_OUT_HIGH);
  		if (IS_ERR(ctx->rst)) {
  			ret = dev_err_probe(dev, PTR_ERR(ctx->rst),
-@@ -732,14 +732,12 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
+@@ -732,14 +739,12 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
  			goto err_put_ipu;
  		}
  
@@ -1668,7 +1683,7 @@ index fe9e59ac311c..8d857bbd8ab5 100644
  		if (ctx->irq < 0) {
  			ret = dev_err_probe(dev, ctx->irq,
  					    "failed to get wake IRQ\n");
-@@ -962,6 +960,7 @@ static const struct acpi_device_id intel_cvs_acpi_match[] = {
+@@ -962,6 +967,7 @@ static const struct acpi_device_id intel_cvs_acpi_match[] = {
  	{ "INTC10DE" }, /* LNL */
  	{ "INTC10E0" }, /* ARL */
  	{ "INTC10E1" }, /* PTL */
@@ -2724,7 +2739,7 @@ index 000000000000..4053aed84340
 +MODULE_DESCRIPTION("Sony imx471 sensor driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index ad3ddfb9ccb1..e87c59c05fbe 100644
+index 510c0eca4484..5473dd598d5b 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
 @@ -97,6 +97,8 @@ static const struct ipu_sensor_config ipu_supported_sensors[] = {
@@ -2736,7 +2751,21 @@ index ad3ddfb9ccb1..e87c59c05fbe 100644
  	/* Toshiba T4KA3 */
  	IPU_SENSOR_CONFIG("XMCC0003", 1, 321468000),
  };
-@@ -134,6 +136,45 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
+@@ -127,6 +129,13 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
+ 		},
+ 		.driver_data = "OVTI02C1",
+ 	},
++	{
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "XPS 14 (Dell 14 Premium) DA14250"),
++		},
++		.driver_data = "OVTI02C1",
++	},
+ 	{
+ 		.matches = {
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
+@@ -134,6 +143,45 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
  		},
  		.driver_data = "OVTI02C1",
  	},
@@ -2782,44 +2811,6 @@ index ad3ddfb9ccb1..e87c59c05fbe 100644
  	{} /* Terminating entry */
  };
  
-@@ -173,6 +214,19 @@ static const struct acpi_device_id ivsc_acpi_ids[] = {
- 	{ "INTC10E1" }, /* PTL */
- };
- 
-+/*
-+ * The subset of ivsc_acpi_ids[] which are IVSC, rather than CVS, devices. The
-+ * CVS IDs are deliberately not listed here: new ones keep being added, whereas
-+ * this list is complete.
-+ */
-+static const struct acpi_device_id ivsc_only_acpi_ids[] = {
-+	{ "INTC1059" },
-+	{ "INTC1095" },
-+	{ "INTC100A" },
-+	{ "INTC10CF" },
-+	{ }
-+};
-+
- static struct acpi_device *ipu_bridge_get_ivsc_acpi_dev(struct acpi_device *adev)
- {
- 	unsigned int i;
-@@ -224,6 +278,17 @@ static struct device *ipu_bridge_get_ivsc_csi_dev(struct acpi_device *adev)
- 		return csi_dev;
- 	}
- 
-+	/*
-+	 * The lookups below match on the ACPI companion alone. That is fine for
-+	 * CVS, which binds a driver to that very device, but not for IVSC: there
-+	 * the ACPI device also has a driverless platform device, which would be
-+	 * returned instead of the mei-csi client. Return NULL for IVSC so that
-+	 * the caller fails and the probe is retried once the IVSC device shows
-+	 * up.
-+	 */
-+	if (!acpi_match_device_ids(adev, ivsc_only_acpi_ids))
-+		return NULL;
-+
- 	/* Try to locate CVS device on the I2C bus */
- 	csi_dev = bus_find_device_by_acpi_dev(&i2c_bus_type, adev);
- 	if (csi_dev)
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index 0500d5fd4f11..b13589a0860e 100644
 --- a/drivers/pci/quirks.c
@@ -2855,6 +2846,258 @@ index 0500d5fd4f11..b13589a0860e 100644
  /*
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
+diff --git a/drivers/platform/x86/intel/int3472/discrete.c b/drivers/platform/x86/intel/int3472/discrete.c
+index 115bb37577a1..749e2e323583 100644
+--- a/drivers/platform/x86/intel/int3472/discrete.c
++++ b/drivers/platform/x86/intel/int3472/discrete.c
+@@ -15,6 +15,7 @@
+ #include <linux/platform_data/x86/int3472.h>
+ #include <linux/platform_device.h>
+ #include <linux/string_choices.h>
++#include <linux/time64.h>
+ #include <linux/uuid.h>
+ 
+ /*
+@@ -123,10 +124,31 @@ skl_int3472_gpiod_get_from_temp_lookup(struct int3472_discrete_device *int3472,
+ 	return desc;
+ }
+ 
++/*
++ * Other vana-supply users (e.g. ST, Toshiba, Sony sensors) can be added to
++ * this array instead of adding new quirk table entries.
++ */
++static const char * const power_enable_hids_vana[] = {
++	"SONY471A", /* imx471 on Lenovo X9-14 and X9-15 */
++	"TBE20A0", /* imx471 on Lenovo X1 Carbon G14 */
++	NULL
++};
++
++static const char * const power_enable_hids_vdd[] = {
++	"INT33F0", /* mt9m114 */
++	NULL
++};
++
++static const char * const power_enable_hids_enable[] = {
++	"INT347E", /* ov7251 */
++	NULL
++};
++
+ /**
+  * struct int3472_gpio_map - Map GPIOs to whatever is expected by the
+  * sensor driver (as in DT bindings)
+- * @hid: The ACPI HID of the device without the instance number e.g. INT347E
++ * @hids: NULL-terminated array of ACPI HIDs of the devices without the
++ * instance number e.g. INT347E
+  * @type_from: The GPIO type from ACPI ?SDT
+  * @type_to: The assigned GPIO type, typically same as @type_from
+  * @enable_time_us: Enable time in usec for GPIOs mapped to regulators
+@@ -135,7 +157,7 @@ skl_int3472_gpiod_get_from_temp_lookup(struct int3472_discrete_device *int3472,
+  * GPIO_ACTIVE_HIGH otherwise
+  */
+ struct int3472_gpio_map {
+-	const char *hid;
++	const char * const *hids;
+ 	u8 type_from;
+ 	u8 type_to;
+ 	bool polarity_low;
+@@ -145,27 +167,38 @@ struct int3472_gpio_map {
+ 
+ static const struct int3472_gpio_map int3472_gpio_map[] = {
+ 	{	/* mt9m114 designs declare a powerdown pin which controls the regulators */
+-		.hid = "INT33F0",
++		.hids = power_enable_hids_vdd,
+ 		.type_from = INT3472_GPIO_TYPE_POWERDOWN,
+ 		.type_to = INT3472_GPIO_TYPE_POWER_ENABLE,
+ 		.con_id = "vdd",
+ 		.enable_time_us = GPIO_REGULATOR_ENABLE_TIME,
+ 	},
+ 	{	/* ov7251 driver / DT-bindings expect "enable" as con_id for reset */
+-		.hid = "INT347E",
++		.hids = power_enable_hids_enable,
+ 		.type_from = INT3472_GPIO_TYPE_RESET,
+ 		.type_to = INT3472_GPIO_TYPE_RESET,
+ 		.con_id = "enable",
+ 	},
+-	{	/* ov08x40's handshake pin needs a 45 ms delay on some HP laptops */
+-		.hid = "OVTI08F4",
+-		.type_from = INT3472_GPIO_TYPE_HANDSHAKE,
+-		.type_to = INT3472_GPIO_TYPE_HANDSHAKE,
+-		.con_id = "dvdd",
+-		.enable_time_us = 45 * USEC_PER_MSEC,
++	{	/* Sensors which expect "vana" as con_id for power enable */
++		.hids = power_enable_hids_vana,
++		.type_from = INT3472_GPIO_TYPE_POWER_ENABLE,
++		.type_to = INT3472_GPIO_TYPE_POWER_ENABLE,
++		.con_id = "vana",
++		.enable_time_us = GPIO_REGULATOR_ENABLE_TIME,
+ 	},
+ };
+ 
++static bool int3472_gpio_map_hids_match(struct acpi_device *adev,
++					const char * const *hids)
++{
++	for (unsigned int i = 0; hids[i]; i++) {
++		if (acpi_dev_hid_uid_match(adev, hids[i], NULL))
++			return true;
++	}
++
++	return false;
++}
++
+ static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3472, u8 *type,
+ 					    const char **con_id, unsigned long *gpio_flags,
+ 					    unsigned int *enable_time_us)
+@@ -182,7 +215,7 @@ static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3
+ 		if (*type != int3472_gpio_map[i].type_from)
+ 			continue;
+ 
+-		if (!acpi_dev_hid_uid_match(adev, int3472_gpio_map[i].hid, NULL))
++		if (!int3472_gpio_map_hids_match(adev, int3472_gpio_map[i].hids))
+ 			continue;
+ 
+ 		dev_dbg(int3472->dev, "mapping type 0x%02x pin to 0x%02x %s\n",
+@@ -234,8 +267,8 @@ static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3
+ 	case INT3472_GPIO_TYPE_HANDSHAKE:
+ 		*con_id = "dvdd";
+ 		*gpio_flags = GPIO_ACTIVE_HIGH;
+-		/* Setups using a handshake pin need 25 ms enable delay */
+-		*enable_time_us = 25 * USEC_PER_MSEC;
++		/* Powering up the sensor through the handshake pin takes up to 200 ms */
++		*enable_time_us = 200 * USEC_PER_MSEC;
+ 		break;
+ 	default:
+ 		*con_id = "unknown";
+@@ -289,8 +322,8 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 	u8 active_value, pin, type;
+ 	unsigned long gpio_flags;
+ 	union acpi_object *obj;
++	unsigned int obj_value;
+ 	struct gpio_desc *gpio;
+-	const char *err_msg;
+ 	const char *con_id;
+ 	int ret;
+ 
+@@ -305,24 +338,27 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 				      &int3472_gpio_guid, 0x00,
+ 				      int3472->ngpios + 2,
+ 				      NULL, ACPI_TYPE_INTEGER);
+-
+ 	if (!obj) {
+ 		dev_warn(int3472->dev, "No _DSM entry for GPIO pin %u\n",
+ 			 agpio->pin_table[0]);
+ 		return 1;
+ 	}
+ 
+-	type = FIELD_GET(INT3472_GPIO_DSM_TYPE, obj->integer.value);
++	obj_value = obj->integer.value;
++
++	ACPI_FREE(obj);
++
++	type = FIELD_GET(INT3472_GPIO_DSM_TYPE, obj_value);
+ 
+ 	int3472_get_con_id_and_polarity(int3472, &type, &con_id, &gpio_flags, &enable_time_us);
+ 
+-	pin = FIELD_GET(INT3472_GPIO_DSM_PIN, obj->integer.value);
++	pin = FIELD_GET(INT3472_GPIO_DSM_PIN, obj_value);
+ 	/* Pin field is not really used under Windows and wraps around at 8 bits */
+ 	if (pin != (agpio->pin_table[0] & 0xff))
+ 		dev_dbg(int3472->dev, FW_BUG "%s %s pin number mismatch _DSM %d resource %d\n",
+ 			con_id, agpio->resource_source.string_ptr, pin, agpio->pin_table[0]);
+ 
+-	active_value = FIELD_GET(INT3472_GPIO_DSM_SENSOR_ON_VAL, obj->integer.value);
++	active_value = FIELD_GET(INT3472_GPIO_DSM_SENSOR_ON_VAL, obj_value);
+ 	if (!active_value)
+ 		gpio_flags ^= GPIO_ACTIVE_LOW;
+ 
+@@ -330,15 +366,18 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 		agpio->resource_source.string_ptr, agpio->pin_table[0],
+ 		str_high_low(gpio_flags == GPIO_ACTIVE_HIGH));
+ 
++	int3472->ngpios++;
++
+ 	switch (type) {
+ 	case INT3472_GPIO_TYPE_RESET:
+ 	case INT3472_GPIO_TYPE_POWERDOWN:
+ 	case INT3472_GPIO_TYPE_HOTPLUG_DETECT:
+ 		ret = skl_int3472_map_gpio_to_sensor(int3472, agpio, con_id, gpio_flags);
+ 		if (ret)
+-			err_msg = "Failed to map GPIO pin to sensor\n";
++			return dev_err_probe(int3472->dev, ret,
++					     "Failed to map GPIO pin to sensor\n");
+ 
+-		break;
++		return 1;
+ 	case INT3472_GPIO_TYPE_CLK_ENABLE:
+ 	case INT3472_GPIO_TYPE_PRIVACY_LED:
+ 	case INT3472_GPIO_TYPE_STROBE:
+@@ -346,24 +385,24 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 	case INT3472_GPIO_TYPE_DOVDD:
+ 	case INT3472_GPIO_TYPE_HANDSHAKE:
+ 		gpio = skl_int3472_gpiod_get_from_temp_lookup(int3472, agpio, con_id, gpio_flags);
+-		if (IS_ERR(gpio)) {
+-			ret = PTR_ERR(gpio);
+-			err_msg = "Failed to get GPIO\n";
+-			break;
+-		}
++		if (IS_ERR(gpio))
++			return dev_err_probe(int3472->dev, PTR_ERR(gpio),
++					     "Failed to get GPIO\n");
+ 
+ 		switch (type) {
+ 		case INT3472_GPIO_TYPE_CLK_ENABLE:
+ 			ret = skl_int3472_register_gpio_clock(int3472, gpio);
+ 			if (ret)
+-				err_msg = "Failed to register clock\n";
++				dev_err_probe(int3472->dev, ret,
++					      "Failed to register clock\n");
+ 
+ 			break;
+ 		case INT3472_GPIO_TYPE_PRIVACY_LED:
+ 		case INT3472_GPIO_TYPE_STROBE:
+ 			ret = skl_int3472_register_led(int3472, gpio, con_id);
+ 			if (ret)
+-				err_msg = "Failed to register LED\n";
++				dev_err_probe(int3472->dev, ret,
++					      "Failed to register LED\n");
+ 
+ 			break;
+ 		case INT3472_GPIO_TYPE_POWER_ENABLE:
+@@ -374,7 +413,8 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 			ret = skl_int3472_register_regulator(int3472, gpio, enable_time_us,
+ 							     con_id, second_sensor);
+ 			if (ret)
+-				err_msg = "Failed to register regulator\n";
++				dev_err_probe(int3472->dev, ret,
++					      "Failed to register regulator\n");
+ 
+ 			break;
+ 		default: /* Never reached */
+@@ -385,23 +425,13 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
+ 		if (ret)
+ 			gpiod_put(gpio);
+ 
+-		break;
++		return ret < 0 ? ret : 1;
+ 	default:
+ 		dev_warn(int3472->dev,
+ 			 "GPIO type 0x%02x unknown; the sensor may not work\n",
+ 			 type);
+-		ret = 1;
+-		break;
++		return 1;
+ 	}
+-
+-	int3472->ngpios++;
+-	ACPI_FREE(obj);
+-
+-	if (ret < 0)
+-		return dev_err_probe(int3472->dev, ret, err_msg);
+-
+-	/* Tell acpi_dev_get_resources() to not make a copy of the resource */
+-	return 1;
+ }
+ 
+ int int3472_discrete_parse_crs(struct int3472_discrete_device *int3472)
 diff --git a/drivers/soundwire/dmi-quirks.c b/drivers/soundwire/dmi-quirks.c
 index 32a46a2d90f7..8f74b0dd2c2a 100644
 --- a/drivers/soundwire/dmi-quirks.c

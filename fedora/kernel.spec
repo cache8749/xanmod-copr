@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.6
-%define specversion 7.2.6
+%define specrpmversion 7.2.7
+%define specversion 7.2.7
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.6
+%define tarfile_release 7.2.7
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.6
+%define kabiversion 7.2.7
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,8 +4964,17 @@ fi\
 #
 #
 %changelog
-* Mon Sep 14 2026 Augusto Caringi <acaringi@redhat.com> [7.2.6-300]
+* Mon Sep 21 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.7-0]
+- platform/x86: int3472: Increase handshake GPIO delay to 200 ms (Hans de Goede)
+- platform/x86: int3472: Clean up GPIO parsing (Sakari Ailus)
+- platform/x86: int3472: Fix uninitialised variable warning (Sakari Ailus)
+- platform: int3472: discrete: Support multiple HIDs per GPIO map entry (Tarang Raval)
+- platform: int3472: discrete: con_id vana for Sony IMX471 as power enable (Kate Hsuan)
+- media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1 (Kate Hsuan)
+- media: ipu-bridge: Add sensor rotation quirk for Dell XPS 14 (Dell 14 Premium) DA14250 (Kate Hsuan)
+- Keep the older NTFS3 module around as well for Fedora (Justin M. Forbes)
 - redhat: configs: fedora: Enable CONFIG_FIREWIRE_KUNIT_NODE_TREE_TEST for x86 (Augusto Caringi)
+- Linux v7.2.7
 
 * Mon Sep 14 2026 Augusto Caringi <acaringi@redhat.com> [7.2.6-0]
 - redhat/configs/fedora: Enable dwc dual-role and ulpi phy support (Hans de Goede)

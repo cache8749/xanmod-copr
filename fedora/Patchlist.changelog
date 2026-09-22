@@ -1,3 +1,24 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/152641e14276a813a9983f45e4d5095c489e8a85
+ 152641e14276a813a9983f45e4d5095c489e8a85 media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4c332b70bebd45509054ce79e294d6dd25b47c82
+ 4c332b70bebd45509054ce79e294d6dd25b47c82 media: ipu-bridge: Add sensor rotation quirk for Dell XPS 14 (Dell 14 Premium) DA14250
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1636269c0f4da8b48afe8e1b5f668e5b864d4060
+ 1636269c0f4da8b48afe8e1b5f668e5b864d4060 platform/x86: int3472: Increase handshake GPIO delay to 200 ms
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ea7a66e4bdb595364104000b6da65a6cd29e2762
+ ea7a66e4bdb595364104000b6da65a6cd29e2762 platform/x86: int3472: Clean up GPIO parsing
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0580b043d6dd66042d427b272c3a86789a3b89cc
+ 0580b043d6dd66042d427b272c3a86789a3b89cc platform/x86: int3472: Fix uninitialised variable warning
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1ca43f9876a8a59653c75f6ff83a8ffcb9c70a5e
+ 1ca43f9876a8a59653c75f6ff83a8ffcb9c70a5e platform: int3472: discrete: Support multiple HIDs per GPIO map entry
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b6218bc942fd7b4eec79f5b021a83d3ba59deedb
+ b6218bc942fd7b4eec79f5b021a83d3ba59deedb platform: int3472: discrete: con_id vana for Sony IMX471 as power enable
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/31d42d7dbe102bc50033b617a2b50948180a796f
  31d42d7dbe102bc50033b617a2b50948180a796f media: i2c: cvs: Get the wake IRQ without claiming the GPIO
 
