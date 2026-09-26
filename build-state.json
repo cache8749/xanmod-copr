@@ -1,9 +1,9 @@
 {
-  "xanmod_tag": "7.2.7-xanmod1",
-  "xanmod_version": "7.2.7",
-  "srpm": "kernel-xanmod-7.2.7-300.xanmod1.src.rpm",
-  "submitted": "2026-09-22T11:07:03Z",
+  "xanmod_tag": "7.2.8-xanmod1",
+  "xanmod_version": "7.2.8",
+  "srpm": "kernel-xanmod-7.2.8-300.xanmod1.src.rpm",
+  "submitted": "2026-09-26T10:57:22Z",
   "fedora_branch": "f45",
-  "fedora_commit": "353f6aa0fe79acfdb1bf7d3d710c30a6a4e97812",
+  "fedora_commit": "d405ff1496c8d4315cba255d8641d88402ec32a1",
   "fedora_pkgrelease": "300"
 }

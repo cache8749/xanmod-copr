@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.7
-%define specversion 7.2.7
+%define specrpmversion 7.2.8
+%define specversion 7.2.8
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.7
+%define tarfile_release 7.2.8
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.7
+%define kabiversion 7.2.8
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,6 +4964,9 @@ fi\
 #
 #
 %changelog
+* Fri Sep 25 2026 Augusto Caringi <acaringi@redhat.com> [7.2.8-0]
+- Linux v7.2.8
+
 * Mon Sep 21 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.7-0]
 - platform/x86: int3472: Increase handshake GPIO delay to 200 ms (Hans de Goede)
 - platform/x86: int3472: Clean up GPIO parsing (Sakari Ailus)

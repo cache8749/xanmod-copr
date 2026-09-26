@@ -1,3 +1,7 @@
+* Fri Sep 25 2026 Augusto Caringi <acaringi@redhat.com> [7.2.8-0]
+- Linux v7.2.8
+Resolves: 
+
 * Mon Sep 21 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.7-0]
 - platform/x86: int3472: Increase handshake GPIO delay to 200 ms (Hans de Goede)
 - platform/x86: int3472: Clean up GPIO parsing (Sakari Ailus)
