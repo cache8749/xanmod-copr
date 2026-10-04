@@ -1,3 +1,9 @@
+* Sat Oct 03 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.9-0]
+- Allow hmac(sha512) for unpriviledged users (Justin M. Forbes)
+- ASoC: SOF: ipc4-topology: Fix shift-out-of-bounds for aggregated ALH capture (Peter Ujfalusi)
+- Linux v7.2.9
+Resolves: 
+
 * Fri Sep 25 2026 Augusto Caringi <acaringi@redhat.com> [7.2.8-0]
 - Linux v7.2.8
 Resolves: 

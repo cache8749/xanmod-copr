@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/1ed622d5cb862ab7ee615fadaa07face64dba67a
+ 1ed622d5cb862ab7ee615fadaa07face64dba67a Allow hmac(sha512) for unpriviledged users
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5130944cf8e71a57a9b7966fdf31ea9e264c3dd5
+ 5130944cf8e71a57a9b7966fdf31ea9e264c3dd5 ASoC: SOF: ipc4-topology: Fix shift-out-of-bounds for aggregated ALH capture
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/152641e14276a813a9983f45e4d5095c489e8a85
  152641e14276a813a9983f45e4d5095c489e8a85 media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1
 
