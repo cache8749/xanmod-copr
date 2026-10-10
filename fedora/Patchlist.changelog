@@ -1,3 +1,111 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/3142072770d64ee5ced172ddabe2eb8d7e6855c7
+ 3142072770d64ee5ced172ddabe2eb8d7e6855c7 spi: cs42l43: Workaround for wrong speaker ID on Dell XPS 13 DX13260
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e2ab3a2b933b497817f62f12edb4720ffd2afcb3
+ e2ab3a2b933b497817f62f12edb4720ffd2afcb3 drm/amdgpu/gmc12: properly pass flush_type to gmc_v12_0_flush_vm_hub()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1f3046684df5213f618cdc804255bd2009fcdce4
+ 1f3046684df5213f618cdc804255bd2009fcdce4 drm/amdgpu/gmc12.1: properly pass flush_type to gmc_v12_1_flush_vm_hub()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f5c71249ddd4f1a6a3aea335e7cb8c08bbb04917
+ f5c71249ddd4f1a6a3aea335e7cb8c08bbb04917 drm/amdgpu/gfx6: fix firmware leak on teardown
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/76df8484ce358099d3898273d8be6062c61fdcaf
+ 76df8484ce358099d3898273d8be6062c61fdcaf drm/amd/pm/si: Fix updating clock limits on AC/DC
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c786a64b2071ee5038e2f704e8d172025c1b040e
+ c786a64b2071ee5038e2f704e8d172025c1b040e drm/amd/pm/si: Check AMD_IS_MOBILITY flag for PPSMC_SYSTEMFLAG_GPIO_DC
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/417055f69e588d357f8206d00fe1793ed872532a
+ 417055f69e588d357f8206d00fe1793ed872532a drm/amd/display: Mark DCE 6.4 as not APU
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a666f53befc94f4d55d11e944b5ccb9bfdd0fbff
+ a666f53befc94f4d55d11e944b5ccb9bfdd0fbff drm/amd/display: Fix stale replay_events after mod_power stream removal
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/311fbf3d9664bd62e1a090bc2810feb4dfd2bfdf
+ 311fbf3d9664bd62e1a090bc2810feb4dfd2bfdf drm/amd/display: Fix fast updates on DCE 8.1
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/828af60ef0e62e9f037dae67ec63b882963692fd
+ 828af60ef0e62e9f037dae67ec63b882963692fd drm/amd/display: Fix fast updates on DCE 6.x
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d140a7f3e5d1eafe0264ba92c2417374018e8804
+ d140a7f3e5d1eafe0264ba92c2417374018e8804 drm/amd/display: check dc_state_create_copy() for NULL in dm_suspend
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a7e6c91d4e342059d8e14a14f884c208fa133511
+ a7e6c91d4e342059d8e14a14f884c208fa133511 drm/amd/display: Preserve eDP mode on initial ASSR failure
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/035c08d87469e122b17f7a23f6b9611921f36192
+ 035c08d87469e122b17f7a23f6b9611921f36192 drm/amd/display: guard dc_sink dereferences in MST mode validation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/974d64be87fb65995c3b98cc7e74ca0531bf56f2
+ 974d64be87fb65995c3b98cc7e74ca0531bf56f2 virtio_blk: set the zone write granularity
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fa3bfc1343f7f3b1ebd873eee5e3e6618918f434
+ fa3bfc1343f7f3b1ebd873eee5e3e6618918f434 xfs: fix exchange-range-to-eof file size exchange
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b26f8327fd3c70da7d60022f00fc6dc1801b69bd
+ b26f8327fd3c70da7d60022f00fc6dc1801b69bd xfs: stop exchanging reflink flags when exchanging mappings
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0a1ce920202ff02877901effd4f1e3d244e186de
+ 0a1ce920202ff02877901effd4f1e3d244e186de arm: dts: bcm2711: Add emc2301 to the CM4 IO board
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/011a6a038e46884404e5c00bc5a5258e7b298ab1
+ 011a6a038e46884404e5c00bc5a5258e7b298ab1 arm: dts: bcm2711: Add wakeup and alias to cm4 rtc
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/166d785783176c5f769a35a31013764cad1ab728
+ 166d785783176c5f769a35a31013764cad1ab728 arm64: dts: broadcom: bcm2712: Add GPU IOMMU and IOMMU cache nodes
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dcee818be24c8ee524067df3126e0960b42d2d04
+ dcee818be24c8ee524067df3126e0960b42d2d04 arm64: dts: broadcom: rpi-5: Add RP1 PWM node
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/31579bff4696617c931cf13db8e4b1ec6c60d116
+ 31579bff4696617c931cf13db8e4b1ec6c60d116 arm64: dts: broadcom: bcm2712-rpi-5-b: add spi0 interface
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/168f38a078fcad79b8a0009b1b1782212deb8f51
+ 168f38a078fcad79b8a0009b1b1782212deb8f51 arm64: dts: broadcom: bcm2712: Add USB OTG port
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3195ede11b97541a8cbf92c2b2d45d52b31a097b
+ 3195ede11b97541a8cbf92c2b2d45d52b31a097b arm64: dts: broadcom: bcm2712: Add thermal monitor
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8d32d79bfa0fd23c68e97c4df8a79c5e13a6d45c
+ 8d32d79bfa0fd23c68e97c4df8a79c5e13a6d45c arm64: dts: broadcom: bcm2712: add arm PMU
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/561e4edab07fbbf33dfc5a1c9d5137a56e1f5e0a
+ 561e4edab07fbbf33dfc5a1c9d5137a56e1f5e0a arm64: dts: broadcom: rp1: add spi controller
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7a27be29a370cdc986c1646158012ec980c01a4e
+ 7a27be29a370cdc986c1646158012ec980c01a4e arm64: dts: broadcom: bcm2712-d-rpi-5-b: add compatible
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4287e954204568ec18817929dce973765b3fd439
+ 4287e954204568ec18817929dce973765b3fd439 dt-bindings: arm: bcm2835: Add 2712-d0 Stepping
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/af26f80d676d30bb231354108a87a846b6b753a4
+ af26f80d676d30bb231354108a87a846b6b753a4 arm64: dts: broadcom: bcm2712: adjust display status
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/56bdd5da2da49f51392cef81cc5602e24492a429
+ 56bdd5da2da49f51392cef81cc5602e24492a429 pwm: rp1: Add RP1 PWM controller driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1bd3182f8e5d2f97c97c5274e346d1db1903bb91
+ 1bd3182f8e5d2f97c97c5274e346d1db1903bb91 dt-bindings: pwm: Add Raspberry Pi RP1 PWM controller
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/acbcf6ea09963088a017e109f29f5dfb999ec196
+ acbcf6ea09963088a017e109f29f5dfb999ec196 iommu: Add Broadcom BCM2712 IOMMU driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/38608da1743bff61a5acff988e86dc1f892246a3
+ 38608da1743bff61a5acff988e86dc1f892246a3 iommu/generic_pt: Add Broadcom BCM2712 page table format
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9ab1ee72c5966f80abd14bc17c637ddff109b4f1
+ 9ab1ee72c5966f80abd14bc17c637ddff109b4f1 dt-bindings: display: brcm,bcm2835-hvs: Document iommus property
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/242f8bb5de2ca8f7ff8e71c2ffc94b4324c8a18c
+ 242f8bb5de2ca8f7ff8e71c2ffc94b4324c8a18c dt-bindings: iommu: Add Broadcom BCM2712 IOMMU
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/24e75822b8661b95fa6c124e7b3a11a1c0b84170
+ 24e75822b8661b95fa6c124e7b3a11a1c0b84170 iommu_pt: Fix test_pgsize_boundary() failure on narrow-OA formats
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/38108d8ec6551228038e9d408edb77c37d1ad278
+ 38108d8ec6551228038e9d408edb77c37d1ad278 media: i2c: imx471: Fix register size for IMX471_REG_DPGA_USE_GLOBAL_GAIN
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/1ed622d5cb862ab7ee615fadaa07face64dba67a
  1ed622d5cb862ab7ee615fadaa07face64dba67a Allow hmac(sha512) for unpriviledged users
 
