@@ -34,7 +34,6 @@
  drivers/acpi/irq.c                                 |  17 +-
  drivers/acpi/scan.c                                |   9 +
  drivers/ata/libahci.c                              |  18 +
- drivers/block/virtio_blk.c                         |   1 +
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/char/random.c                              | 128 ++-
@@ -43,17 +42,6 @@
  drivers/firmware/efi/libstub/fdt.c                 |   5 +
  drivers/firmware/efi/libstub/secureboot.c          |  14 +-
  drivers/firmware/efi/secureboot.c                  |  38 +
- drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c              |   9 +
- drivers/gpu/drm/amd/amdgpu/gmc_v12_0.c             |   2 +-
- drivers/gpu/drm/amd/amdgpu/gmc_v12_1.c             |   2 +-
- drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c  |   9 +-
- .../amd/display/amdgpu_dm/amdgpu_dm_mst_types.c    |   6 +-
- drivers/gpu/drm/amd/display/dc/dc.h                |   1 +
- .../dc/link/protocols/link_edp_panel_control.c     |   4 +-
- .../amd/display/dc/resource/dce60/dce60_resource.c |  13 +-
- .../amd/display/dc/resource/dce80/dce80_resource.c |   2 +
- drivers/gpu/drm/amd/display/modules/power/power.c  |   2 +
- drivers/gpu/drm/amd/pm/legacy-dpm/si_dpm.c         |  39 +-
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +
  drivers/iommu/Kconfig                              |  15 +
  drivers/iommu/Makefile                             |   1 +
@@ -81,7 +69,6 @@
  drivers/pwm/Makefile                               |   1 +
  drivers/pwm/pwm-rp1.c                              | 428 +++++++++
  drivers/soundwire/dmi-quirks.c                     |   7 +
- drivers/spi/spi-cs42l43.c                          |  97 +++
  drivers/usb/core/hub.c                             |   7 +
  fs/xfs/libxfs/xfs_exchmaps.c                       | 103 +--
  fs/xfs/libxfs/xfs_log_format.h                     |   4 +-
@@ -106,7 +93,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 108 files changed, 4204 insertions(+), 340 deletions(-)
+ 95 files changed, 4043 insertions(+), 314 deletions(-)
 
 diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
 index b707bd314a64..9a1bd53287f4 100644
@@ -429,7 +416,7 @@ index 95cd976a068c..797dade0f92b 100644
  M:	Maxim Levitsky <maximlevitsky@gmail.com>
  M:	Alex Dubov <oakad@yahoo.com>
 diff --git a/Makefile b/Makefile
-index 6f8ed7329a20..928ca4ceafec 100644
+index be413b167b24..f2dc977017fc 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -543,10 +530,10 @@ index 1f4ebec68370..4f81fbdb85b5 100644
  };
  
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index fc57d90d92c1..9e96c3e403e8 100644
+index 89b6a7dc6d32..35f169143b2a 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1489,7 +1489,7 @@ endchoice
+@@ -1519,7 +1519,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -1730,18 +1717,6 @@ index 08ab56e95566..3d29a2511800 100644
  	/* wait for engine to stop. This could be as long as 500 msec */
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
-diff --git a/drivers/block/virtio_blk.c b/drivers/block/virtio_blk.c
-index 32bf3ba07a9d..c8bfbf8435ac 100644
---- a/drivers/block/virtio_blk.c
-+++ b/drivers/block/virtio_blk.c
-@@ -743,6 +743,7 @@ static int virtblk_read_zoned_limits(struct virtio_blk *vblk,
- 		dev_warn(&vdev->dev, "zero write granularity reported\n");
- 		return -ENODEV;
- 	}
-+	lim->zone_write_granularity = wg;
- 	lim->physical_block_size = wg;
- 	lim->io_min = wg;
- 
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
 index 505e32911c34..26f7ee0ccf40 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
@@ -2269,290 +2244,6 @@ index 000000000000..de0a3714a5d4
 +		}
 +	}
 +}
-diff --git a/drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c b/drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c
-index 8f3f90d5ce37..d5141bcb283b 100644
---- a/drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c
-+++ b/drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c
-@@ -322,6 +322,14 @@ static const u32 verde_rlc_save_restore_register_list[] =
- 	0x00000000
- };
- 
-+static void gfx_v6_0_free_microcode(struct amdgpu_device *adev)
-+{
-+	amdgpu_ucode_release(&adev->gfx.pfp_fw);
-+	amdgpu_ucode_release(&adev->gfx.me_fw);
-+	amdgpu_ucode_release(&adev->gfx.ce_fw);
-+	amdgpu_ucode_release(&adev->gfx.rlc_fw);
-+}
-+
- static int gfx_v6_0_init_microcode(struct amdgpu_device *adev)
- {
- 	const char *chip_name;
-@@ -3187,6 +3195,7 @@ static int gfx_v6_0_sw_fini(struct amdgpu_ip_block *ip_block)
- 		amdgpu_ring_fini(&adev->gfx.compute_ring[i]);
- 
- 	amdgpu_gfx_rlc_fini(adev);
-+	gfx_v6_0_free_microcode(adev);
- 
- 	return 0;
- }
-diff --git a/drivers/gpu/drm/amd/amdgpu/gmc_v12_0.c b/drivers/gpu/drm/amd/amdgpu/gmc_v12_0.c
-index 84c93364d220..0fc0c783b1cc 100644
---- a/drivers/gpu/drm/amd/amdgpu/gmc_v12_0.c
-+++ b/drivers/gpu/drm/amd/amdgpu/gmc_v12_0.c
-@@ -327,7 +327,7 @@ static void gmc_v12_0_flush_gpu_tlb(struct amdgpu_device *adev, uint32_t vmid,
- 		return;
- 	}
- 
--	gmc_v12_0_flush_vm_hub(adev, vmid, vmhub, 0);
-+	gmc_v12_0_flush_vm_hub(adev, vmid, vmhub, flush_type);
- 	return;
- }
- 
-diff --git a/drivers/gpu/drm/amd/amdgpu/gmc_v12_1.c b/drivers/gpu/drm/amd/amdgpu/gmc_v12_1.c
-index 5fe43f7eab29..5d0d316fa94e 100644
---- a/drivers/gpu/drm/amd/amdgpu/gmc_v12_1.c
-+++ b/drivers/gpu/drm/amd/amdgpu/gmc_v12_1.c
-@@ -389,7 +389,7 @@ static void gmc_v12_1_flush_gpu_tlb(struct amdgpu_device *adev, uint32_t vmid,
- 		return;
- 	}
- 
--	gmc_v12_1_flush_vm_hub(adev, vmid, vmhub, 0);
-+	gmc_v12_1_flush_vm_hub(adev, vmid, vmhub, flush_type);
- 	return;
- }
- 
-diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-index e5945485ec59..5d46bfe47526 100644
---- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-+++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-@@ -3516,9 +3516,14 @@ static int dm_suspend(struct amdgpu_ip_block *ip_block)
- 		dc_allow_idle_optimizations(adev->dm.dc, false);
- 
- 		dm->cached_dc_state = dc_state_create_copy(dm->dc->current_state);
-+		if (!dm->cached_dc_state) {
-+			drm_err(adev_to_drm(adev),
-+				"Failed to allocate cached DC state during suspend\n");
-+			mutex_unlock(&dm->dc_lock);
-+			return -ENOMEM;
-+		}
- 
--		if (dm->cached_dc_state)
--			dm_gpureset_toggle_interrupts(adev, dm->cached_dc_state, false);
-+		dm_gpureset_toggle_interrupts(adev, dm->cached_dc_state, false);
- 
- 		res = amdgpu_dm_commit_zero_streams(dm->dc);
- 		if (res != DC_OK) {
-diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
-index b3af7445b457..145cec552c21 100644
---- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
-+++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
-@@ -1181,7 +1181,8 @@ static bool get_conv_frl_bw(struct amdgpu_dm_connector *aconnector,
- 	unsigned int max_sink_bw_in_kbps = 0;
- 	unsigned int dsc_max_sink_bw_in_kbps = 0;
- 
--	if (aconnector->dc_link->dc->caps.dp_hdmi21_pcon_support &&
-+	if (aconnector->dc_sink &&
-+	    aconnector->dc_link->dc->caps.dp_hdmi21_pcon_support &&
- 	    aconnector->mst_downstream_port_caps.bytes.byte0.bits.DWN_STRM_PORTX_TYPE == DOWN_STREAM_DETAILED_HDMI) {
- 		max_conv_bw_in_kbps = dc_link_bw_kbps_from_raw_frl_link_rate_data(
- 				aconnector->dc_link->dc,
-@@ -1946,6 +1947,9 @@ enum dc_status dm_dp_mst_is_port_support_mode(
- 	struct dc_dsc_config_options dsc_options = {0};
- 	uint32_t stream_kbps;
- 
-+	if (!aconnector->dc_sink)
-+		return DC_FAIL_BANDWIDTH_VALIDATE;
-+
- 	/* DSC unnecessary case
- 	 * Check if timing could be supported within end-to-end BW
- 	 */
-diff --git a/drivers/gpu/drm/amd/display/dc/dc.h b/drivers/gpu/drm/amd/display/dc/dc.h
-index 1dc85f6b6689..79184384cdfd 100644
---- a/drivers/gpu/drm/amd/display/dc/dc.h
-+++ b/drivers/gpu/drm/amd/display/dc/dc.h
-@@ -1763,6 +1763,7 @@ struct dc_scratch_space {
- 	struct ddc_service *ddc;
- 
- 	enum dp_panel_mode panel_mode;
-+	bool panel_mode_initialized;
- 	bool aux_mode;
- 
- 	/* Private to DC core */
-diff --git a/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c b/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-index 80a372ceaa51..20157f67be07 100644
---- a/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-+++ b/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-@@ -92,6 +92,7 @@ void dp_set_panel_mode(struct dc_link *link, enum dp_panel_mode panel_mode)
- 	}
- 
- 	link->panel_mode = panel_mode;
-+	link->panel_mode_initialized = true;
- 	DC_LOG_DETECTION_DP_CAPS("%d eDP panel mode supported: %d, enabled: %d\n",
- 				 link->link_index,
- 				 link->dpcd_caps.panel_mode_edp,
-@@ -1300,7 +1301,8 @@ void edp_set_panel_assr(struct dc_link *link, struct pipe_ctx *pipe_ctx,
- 
- 		result = cp_psp->funcs.enable_assr(cp_psp->handle, link);
- 
--		if (!result && link->panel_mode != DP_PANEL_MODE_EDP)
-+		if (!result && link->panel_mode_initialized &&
-+		    link->panel_mode != DP_PANEL_MODE_EDP)
- 			*panel_mode = DP_PANEL_MODE_DEFAULT;
- 	}
- }
-diff --git a/drivers/gpu/drm/amd/display/dc/resource/dce60/dce60_resource.c b/drivers/gpu/drm/amd/display/dc/resource/dce60/dce60_resource.c
-index d2d56a1c4b8b..65c7dae3ff66 100644
---- a/drivers/gpu/drm/amd/display/dc/resource/dce60/dce60_resource.c
-+++ b/drivers/gpu/drm/amd/display/dc/resource/dce60/dce60_resource.c
-@@ -448,6 +448,12 @@ static const struct dce_abm_mask abm_mask = {
- 		ABM_MASK_SH_LIST_DCE110(_MASK)
- };
- 
-+static const struct dc_debug_options debug_defaults = { 0 };
-+
-+static const struct dc_check_config config_defaults = {
-+	.enable_legacy_fast_update = true,
-+};
-+
- #define CTX  ctx
- #define REG(reg) mm ## reg
- 
-@@ -937,6 +943,8 @@ static bool dce60_construct(
- 	dc->caps.max_cursor_size = 64;
- 	dc->caps.dual_link_dvi = true;
- 	dc->caps.extended_aux_timeout_support = false;
-+	dc->debug = debug_defaults;
-+	dc->check_config = config_defaults;
- 
- 	/*************************************************
- 	 *  Create resources                             *
-@@ -1134,6 +1142,8 @@ static bool dce61_construct(
- 	dc->caps.i2c_speed_in_khz = 40;
- 	dc->caps.max_cursor_size = 64;
- 	dc->caps.is_apu = true;
-+	dc->debug = debug_defaults;
-+	dc->check_config = config_defaults;
- 
- 	/*************************************************
- 	 *  Create resources                             *
-@@ -1331,7 +1341,8 @@ static bool dce64_construct(
- 	dc->caps.max_downscale_ratio = 200;
- 	dc->caps.i2c_speed_in_khz = 40;
- 	dc->caps.max_cursor_size = 64;
--	dc->caps.is_apu = true;
-+	dc->debug = debug_defaults;
-+	dc->check_config = config_defaults;
- 
- 	/*************************************************
- 	 *  Create resources                             *
-diff --git a/drivers/gpu/drm/amd/display/dc/resource/dce80/dce80_resource.c b/drivers/gpu/drm/amd/display/dc/resource/dce80/dce80_resource.c
-index 26820d35478a..2f4de697ec4b 100644
---- a/drivers/gpu/drm/amd/display/dc/resource/dce80/dce80_resource.c
-+++ b/drivers/gpu/drm/amd/display/dc/resource/dce80/dce80_resource.c
-@@ -1148,6 +1148,8 @@ static bool dce81_construct(
- 	dc->caps.max_cursor_size = 128;
- 	dc->caps.min_horizontal_blanking_period = 80;
- 	dc->caps.is_apu = true;
-+	dc->debug = debug_defaults;
-+	dc->check_config = config_defaults;
- 
- 	/*************************************************
- 	 *  Create resources                             *
-diff --git a/drivers/gpu/drm/amd/display/modules/power/power.c b/drivers/gpu/drm/amd/display/modules/power/power.c
-index 5659a38b3366..d0afb0e03e3a 100644
---- a/drivers/gpu/drm/amd/display/modules/power/power.c
-+++ b/drivers/gpu/drm/amd/display/modules/power/power.c
-@@ -333,6 +333,7 @@ bool mod_power_add_stream(struct mod_power *mod_power,
- 		core_power->map[core_power->num_entities].psr_enabled = 0;
- 		core_power->map[core_power->num_entities].psr_events = psr_event_vsync;
- 		core_power->map[core_power->num_entities].psr_power_opt = 0;
-+		core_power->map[core_power->num_entities].replay_events = replay_event_vsync;
- 		core_power->num_entities++;
- 		return true;
- 	}
-@@ -392,6 +393,7 @@ bool mod_power_remove_stream(struct mod_power *mod_power,
- 		core_power->map[i].psr_enabled = core_power->map[i + 1].psr_enabled;
- 		core_power->map[i].psr_events = core_power->map[i + 1].psr_events;
- 		core_power->map[i].psr_power_opt = core_power->map[i + 1].psr_power_opt;
-+		core_power->map[i].replay_events = core_power->map[i + 1].replay_events;
- 
- 		memcpy(core_power->map[i].psr_context, core_power->map[i + 1].psr_context, sizeof(struct mod_power_psr_context));
- 		memset(core_power->map[i + 1].psr_context, 0, sizeof(struct mod_power_psr_context));
-diff --git a/drivers/gpu/drm/amd/pm/legacy-dpm/si_dpm.c b/drivers/gpu/drm/amd/pm/legacy-dpm/si_dpm.c
-index 012227c70600..d26be73637e3 100644
---- a/drivers/gpu/drm/amd/pm/legacy-dpm/si_dpm.c
-+++ b/drivers/gpu/drm/amd/pm/legacy-dpm/si_dpm.c
-@@ -5263,7 +5263,8 @@ static int si_init_smc_table(struct amdgpu_device *adev)
- 		break;
- 	}
- 
--	if (adev->pm.dpm.platform_caps & ATOM_PP_PLATFORM_CAP_HARDWAREDC)
-+	if ((adev->flags & AMD_IS_MOBILITY) &&
-+	    (adev->pm.dpm.platform_caps & ATOM_PP_PLATFORM_CAP_HARDWAREDC))
- 		table->systemFlags |= PPSMC_SYSTEMFLAG_GPIO_DC;
- 
- 	if (adev->pm.dpm.platform_caps & ATOM_PP_PLATFORM_CAP_REGULATOR_HOT) {
-@@ -7237,6 +7238,19 @@ static void si_parse_pplib_non_clock_info(struct amdgpu_device *adev,
- 		adev->pm.dpm.uvd_ps = rps;
- }
- 
-+static void si_update_limits(struct amdgpu_clock_and_voltage_limits *limits,
-+			     struct rv7xx_pl *pl)
-+{
-+	if (pl->sclk > limits->sclk)
-+		limits->sclk = pl->sclk;
-+	if (pl->mclk > limits->mclk)
-+		limits->mclk = pl->mclk;
-+	if (pl->vddc > limits->vddc)
-+		limits->vddc = pl->vddc;
-+	if (pl->vddci > limits->vddci)
-+		limits->vddci = pl->vddci;
-+}
-+
- static void si_parse_pplib_clock_info(struct amdgpu_device *adev,
- 				      struct amdgpu_ps *rps, int index,
- 				      union pplib_clock_info *clock_info)
-@@ -7245,7 +7259,6 @@ static void si_parse_pplib_clock_info(struct amdgpu_device *adev,
- 	struct evergreen_power_info *eg_pi = evergreen_get_pi(adev);
- 	struct si_power_info *si_pi = si_get_pi(adev);
- 	struct  si_ps *ps = si_get_ps(rps);
--	struct amdgpu_clock_and_voltage_limits *limits;
- 	u16 leakage_voltage;
- 	struct rv7xx_pl *pl = &ps->performance_levels[index];
- 	int ret;
-@@ -7310,26 +7323,14 @@ static void si_parse_pplib_clock_info(struct amdgpu_device *adev,
- 	 * VBIOS can contain conflicting values between:
- 	 * - the maximum allowed clocks and voltages on AC or DC
- 	 * - the clocks and voltages in power states on AC or DC
-+	 *
-+	 * Assume that the AC limits are the maximum of all power states,
-+	 * and the DC limits are the maximum of battery power states.
- 	 */
-+	si_update_limits(&adev->pm.dpm.dyn_state.max_clock_voltage_on_ac, pl);
- 	if ((rps->class & ATOM_PPLIB_CLASSIFICATION_UI_MASK) ==
--	    ATOM_PPLIB_CLASSIFICATION_UI_PERFORMANCE)
--		limits = &adev->pm.dpm.dyn_state.max_clock_voltage_on_ac;
--	else if ((rps->class & ATOM_PPLIB_CLASSIFICATION_UI_MASK) ==
- 		 ATOM_PPLIB_CLASSIFICATION_UI_BATTERY)
--		limits = &adev->pm.dpm.dyn_state.max_clock_voltage_on_dc;
--	else
--		limits = NULL;
--
--	if (limits) {
--		if (pl->sclk > limits->sclk)
--			limits->sclk = pl->sclk;
--		if (pl->mclk > limits->mclk)
--			limits->mclk = pl->mclk;
--		if (pl->vddc > limits->vddc)
--			limits->vddc = pl->vddc;
--		if (pl->vddci > limits->vddci)
--			limits->vddci = pl->vddci;
--	}
-+		si_update_limits(&adev->pm.dpm.dyn_state.max_clock_voltage_on_dc, pl);
- }
- 
- union pplib_power_state {
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 index 2247ad55d444..5f9da88479e8 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
@@ -5731,132 +5422,11 @@ index ff00c4b2578e..ad8853481835 100644
  	{
  		.matches = {
  			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-diff --git a/drivers/spi/spi-cs42l43.c b/drivers/spi/spi-cs42l43.c
-index 7106a8a4f280..6772abb483dd 100644
---- a/drivers/spi/spi-cs42l43.c
-+++ b/drivers/spi/spi-cs42l43.c
-@@ -11,6 +11,7 @@
- #include <linux/bitfield.h>
- #include <linux/cleanup.h>
- #include <linux/device.h>
-+#include <linux/dmi.h>
- #include <linux/errno.h>
- #include <linux/gpio/consumer.h>
- #include <linux/gpio/machine.h>
-@@ -215,12 +216,108 @@ static size_t cs42l43_spi_max_length(struct spi_device *spi)
- 	return CS42L43_SPI_MAX_LENGTH;
- }
- 
-+/*
-+ * Workaround needed for two speaker ID pins in one ACPI GpioIo() but
-+ * the Linux-specific _DSD property only contains one pin.
-+ * Create a temporary acpi_gpio_mapping pointing at both pins.
-+ */
-+static const struct acpi_gpio_params cs42l43_2bit_speaker_id_from_one_gpioio_params[] = {
-+	[0] = {
-+		.crs_entry_index = 0,
-+		.line_index = 0,
-+	},
-+	[1] = {
-+		.crs_entry_index = 0,
-+		.line_index = 1,
-+	},
-+};
-+
-+static const struct acpi_gpio_mapping cs42l43_2bit_speaker_id_from_one_gpioio_mapping[] = {
-+	{
-+		.name = "spk-id-quirk-gpios",
-+		.data = cs42l43_2bit_speaker_id_from_one_gpioio_params,
-+		.size = ARRAY_SIZE(cs42l43_2bit_speaker_id_from_one_gpioio_params),
-+	},
-+	{ }
-+};
-+
-+static int cs42l43_get_2bit_speaker_id_from_one_gpioio(struct cs42l43_spi *priv, int *result)
-+{
-+	struct fwnode_reference_args args;
-+	struct acpi_device *adev;
-+	struct gpio_desc *desc;
-+	u32 spkid = 0;
-+	int i, ret;
-+
-+	/* Use the _DSD property to get the node containing the GpioIo() */
-+	ret = fwnode_property_get_reference_args(dev_fwnode(priv->dev), "spk-id-gpios",
-+						 NULL, 3, 0, &args);
-+	if (ret)
-+		return ret;
-+
-+	struct fwnode_handle *fwnode __free(fwnode_handle) = args.fwnode;
-+
-+	/* An acpi_gpio_mapping must be added to the node that contains the GpioIo() */
-+	adev = to_acpi_device_node(fwnode);
-+	if (!adev)
-+		return -EINVAL;
-+
-+	ret = acpi_dev_add_driver_gpios(adev, cs42l43_2bit_speaker_id_from_one_gpioio_mapping);
-+	if (ret)
-+		return ret;
-+
-+	/* gpiod_get_array() can't read from a mapping in a child node */
-+	for (i = 0; i < ARRAY_SIZE(cs42l43_2bit_speaker_id_from_one_gpioio_params); i++) {
-+		desc = fwnode_gpiod_get_index(fwnode, "spk-id-quirk", i, GPIOD_IN,
-+					      dev_name(priv->dev));
-+		if (IS_ERR(desc)) {
-+			ret = PTR_ERR(desc);
-+			goto out;
-+		}
-+
-+		ret = gpiod_get_value_cansleep(desc);
-+		gpiod_put(desc);
-+		if (ret < 0)
-+			goto out;
-+
-+		spkid |= (u32)ret << i;
-+	}
-+
-+	dev_dbg(priv->dev, "spk-id-gpios = %u\n", spkid);
-+	*result = spkid;
-+	ret = 0;
-+out:
-+	acpi_dev_remove_driver_gpios(adev);
-+
-+	return ret;
-+}
-+
-+static const struct dmi_system_id cs42l43_spk_id_quirks[] = {
-+	{
-+		.ident = "Dell XPS 13 DX13260",
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Dell Inc"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_SKU, "0E53"),
-+		},
-+		.driver_data = cs42l43_get_2bit_speaker_id_from_one_gpioio,
-+	},
-+	{ }
-+};
-+
- static int cs42l43_get_speaker_id_gpios(struct cs42l43_spi *priv, int *result)
- {
-+	const struct dmi_system_id *dmi_id;
- 	struct gpio_descs *descs;
- 	u32 spkid;
- 	int i, ret;
- 
-+	dmi_id = dmi_first_match(cs42l43_spk_id_quirks);
-+	if (dmi_id) {
-+		int (*get_speaker_id)(struct cs42l43_spi *priv, int *result) = dmi_id->driver_data;
-+
-+		return get_speaker_id(priv, result);
-+	}
-+
- 	descs = gpiod_get_array_optional(priv->dev, "spk-id", GPIOD_IN);
- 	if (!descs)
- 		return 0;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 068c7bea3102..cecfac2b0bdc 100644
+index b119f5b6065c..4dbae2e80b1f 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5907,6 +5907,13 @@ static void hub_event(struct work_struct *work)
+@@ -5912,6 +5912,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
@@ -6461,7 +6031,7 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/net/core/page_pool.c b/net/core/page_pool.c
-index 8f8956fb061b..08d7f35cf608 100644
+index 34ce99514d72..d7c88c0b67e5 100644
 --- a/net/core/page_pool.c
 +++ b/net/core/page_pool.c
 @@ -1073,7 +1073,8 @@ netmem_ref page_pool_alloc_frag_netmem(struct page_pool *pool,

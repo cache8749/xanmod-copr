@@ -1,3 +1,8 @@
+* Sun Oct 11 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.10-0]
+- Add config for ARM64_ERRATUM_3821522 (Justin M. Forbes)
+- Linux v7.2.10
+Resolves: 
+
 * Fri Oct 09 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.9-1]
 - Config fixes for RHEL configs with backports (Justin M. Forbes)
 - spi: cs42l43: Workaround for wrong speaker ID on Dell XPS 13 DX13260 (Richard Fitzgerald)
