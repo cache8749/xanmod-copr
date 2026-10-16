@@ -1,3 +1,8 @@
+* Thu Oct 15 2026 Augusto Caringi <acaringi@redhat.com> [7.2.11-0]
+- media: i2c: imx471: Set max analog gain to 960 (Kate Hsuan)
+- Linux v7.2.11
+Resolves: 
+
 * Sun Oct 11 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.10-0]
 - Add config for ARM64_ERRATUM_3821522 (Justin M. Forbes)
 - Linux v7.2.10

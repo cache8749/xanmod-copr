@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/024b52371a2ca17f49fa8b95f750e33684d3b1ad
+ 024b52371a2ca17f49fa8b95f750e33684d3b1ad media: i2c: imx471: Set max analog gain to 960
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/3142072770d64ee5ced172ddabe2eb8d7e6855c7
  3142072770d64ee5ced172ddabe2eb8d7e6855c7 spi: cs42l43: Workaround for wrong speaker ID on Dell XPS 13 DX13260
 
