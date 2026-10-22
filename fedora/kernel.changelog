@@ -1,3 +1,9 @@
+* Wed Oct 21 2026 Augusto Caringi <acaringi@redhat.com> [7.2.12-0]
+- ALSA: hda/realtek: Fix cold-boot headset misdetection on Acer Aspire A515-57G (Oleksandr Kovalov)
+- Turn on EROFS_FS_PAGE_CACHE_SHARE for Fedora (Justin M. Forbes)
+- Linux v7.2.12
+Resolves: 
+
 * Thu Oct 15 2026 Augusto Caringi <acaringi@redhat.com> [7.2.11-0]
 - media: i2c: imx471: Set max analog gain to 960 (Kate Hsuan)
 - Linux v7.2.11

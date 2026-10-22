@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.11
-%define specversion 7.2.11
+%define specrpmversion 7.2.12
+%define specversion 7.2.12
 %define patchversion 7.2
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.2.11
+%define tarfile_release 7.2.12
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.11
+%define kabiversion 7.2.12
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,6 +4964,11 @@ fi\
 #
 #
 %changelog
+* Wed Oct 21 2026 Augusto Caringi <acaringi@redhat.com> [7.2.12-0]
+- ALSA: hda/realtek: Fix cold-boot headset misdetection on Acer Aspire A515-57G (Oleksandr Kovalov)
+- Turn on EROFS_FS_PAGE_CACHE_SHARE for Fedora (Justin M. Forbes)
+- Linux v7.2.12
+
 * Thu Oct 15 2026 Augusto Caringi <acaringi@redhat.com> [7.2.11-0]
 - media: i2c: imx471: Set max analog gain to 960 (Kate Hsuan)
 - Linux v7.2.11

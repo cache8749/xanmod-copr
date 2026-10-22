@@ -85,11 +85,12 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
+ sound/hda/codecs/realtek/alc269.c                  |  35 +
  sound/soc/sof/ipc4-topology.c                      |   9 +-
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 91 files changed, 3985 insertions(+), 199 deletions(-)
+ 92 files changed, 4020 insertions(+), 199 deletions(-)
 
 diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
 index b707bd314a64..9a1bd53287f4 100644
@@ -412,7 +413,7 @@ index 95cd976a068c..797dade0f92b 100644
  M:	Maxim Levitsky <maximlevitsky@gmail.com>
  M:	Alex Dubov <oakad@yahoo.com>
 diff --git a/Makefile b/Makefile
-index 4b60c83ab75c..b4cb8040b16c 100644
+index a550506403fe..7045744faf6a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -5850,6 +5851,73 @@ index 8d46886d2cca..14a9cdff942b 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
+diff --git a/sound/hda/codecs/realtek/alc269.c b/sound/hda/codecs/realtek/alc269.c
+index e98cc42e1a78..fdba2adea459 100644
+--- a/sound/hda/codecs/realtek/alc269.c
++++ b/sound/hda/codecs/realtek/alc269.c
+@@ -2309,6 +2309,33 @@ static void alc_fixup_headset_mode_alc255_no_hp_mic(struct hda_codec *codec,
+ 	}
+ }
+ 
++/*
++ * On the Acer Aspire A515-57G (and possibly other models sharing this
++ * board), if headphones are already inserted into the combo jack before
++ * the codec powers up (cold boot), the impedance-based headset-type
++ * sensing races and misclassifies the jack, driving the wrong output
++ * configuration (audible as missing center-panned/vocal content). A
++ * genuine physical unplug/replug after boot fixes it by forcing a fresh
++ * sense transient. Mirror that here on cold boot only: give the sense
++ * hardware time to settle, then force a fresh classification.
++ */
++static void alc_fixup_headset_mode_acer_coldboot(struct hda_codec *codec,
++						 const struct hda_fixup *fix, int action)
++{
++	struct alc_spec *spec = codec->spec;
++
++	alc_fixup_headset_mode(codec, fix, action);
++
++	if (action == HDA_FIXUP_ACT_INIT &&
++	    !is_s3_resume(codec) && !is_s4_resume(codec) &&
++		spec->current_headset_mode != ALC_HEADSET_MODE_UNPLUGGED) {
++		msleep(500);
++		spec->current_headset_mode = ALC_HEADSET_MODE_UNKNOWN;
++		spec->current_headset_type = ALC_HEADSET_TYPE_UNKNOWN;
++		alc_fixup_headset_mode(codec, fix, action);
++	}
++}
++
+ static void alc288_update_headset_jack_cb(struct hda_codec *codec,
+ 				       struct hda_jack_callback *jack)
+ {
+@@ -4134,6 +4161,7 @@ enum {
+ 	ALC282_FIXUP_ACER_DISABLE_LINEOUT,
+ 	ALC255_FIXUP_ACER_LIMIT_INT_MIC_BOOST,
+ 	ALC256_FIXUP_ACER_HEADSET_MIC,
++	ALC256_FIXUP_ACER_COLDBOOT,
+ 	ALC285_FIXUP_IDEAPAD_S740_COEF,
+ 	ALC285_FIXUP_HP_LIMIT_INT_MIC_BOOST,
+ 	ALC295_FIXUP_ASUS_DACS,
+@@ -6158,6 +6186,12 @@ static const struct hda_fixup alc269_fixups[] = {
+ 		.chained = true,
+ 		.chain_id = ALC269_FIXUP_HEADSET_MODE_NO_HP_MIC
+ 	},
++	[ALC256_FIXUP_ACER_COLDBOOT] = {
++		.type = HDA_FIXUP_FUNC,
++		.v.func = alc_fixup_headset_mode_acer_coldboot,
++		.chained = true,
++		.chain_id = ALC256_FIXUP_ACER_SFG16_MICMUTE_LED,
++	},
+ 	[ALC285_FIXUP_IDEAPAD_S740_COEF] = {
+ 		.type = HDA_FIXUP_FUNC,
+ 		.v.func = alc285_fixup_ideapad_s740_coef,
+@@ -6969,6 +7003,7 @@ static const struct hda_quirk alc269_fixup_tbl[] = {
+ 	SND_PCI_QUIRK(0x1025, 0x1597, "Acer Nitro 5 AN517-55", ALC2XX_FIXUP_HEADSET_MIC),
+ 	SND_PCI_QUIRK(0x1025, 0x159e, "Acer Nitro 5 AN515-46", ALC2XX_FIXUP_HEADSET_MIC),
+ 	SND_PCI_QUIRK(0x1025, 0x160e, "Acer PT316-51S", ALC2XX_FIXUP_HEADSET_MIC),
++	SND_PCI_QUIRK(0x1025, 0x1616, "Acer Aspire A515-57", ALC256_FIXUP_ACER_COLDBOOT),
+ 	SND_PCI_QUIRK(0x1025, 0x161f, "Acer S40-54", ALC256_FIXUP_ACER_MIC_NO_PRESENCE),
+ 	SND_PCI_QUIRK(0x1025, 0x1640, "Acer Aspire A315-44P", ALC256_FIXUP_ACER_SFG16_MICMUTE_LED),
+ 	SND_PCI_QUIRK(0x1025, 0x1679, "Acer Nitro 16 AN16-41", ALC2XX_FIXUP_HEADSET_MIC),
 diff --git a/sound/soc/sof/ipc4-topology.c b/sound/soc/sof/ipc4-topology.c
 index 8f37fbdd3f7f..5ac0195e8505 100644
 --- a/sound/soc/sof/ipc4-topology.c
