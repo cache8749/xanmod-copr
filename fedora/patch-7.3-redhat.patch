@@ -1,31 +1,24 @@
- Documentation/admin-guide/sysctl/crypto.rst        |  36 +
- Documentation/crypto/userspace-if.rst              |  13 +-
  .../devicetree/bindings/arm/bcm/bcm2835.yaml       |   6 +
  .../bindings/display/brcm,bcm2835-hvs.yaml         |   3 +
  .../bindings/iommu/brcm,bcm2712-iommu.yaml         |  54 ++
- .../bindings/iommu/brcm,bcm2712-iommuc.yaml        |  40 +
- .../bindings/pwm/raspberrypi,rp1-pwm.yaml          |  66 ++
- MAINTAINERS                                        |  18 +
- Makefile                                           |  30 +
- arch/arm/Kconfig                                   |   4 +-
+ .../bindings/iommu/brcm,bcm2712-iommuc.yaml        |  40 ++
+ .../bindings/pwm/raspberrypi,rp1-pwm.yaml          |  66 +++
+ MAINTAINERS                                        |  12 +
+ Makefile                                           |  38 +-
  arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts  |  21 +-
  arch/arm64/Kconfig                                 |   2 +-
  arch/arm64/boot/dts/broadcom/bcm2712-d-rpi-5-b.dts |   5 +
- .../boot/dts/broadcom/bcm2712-rpi-5-b-base.dtsi    |  41 +
- arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts   |  34 +
- arch/arm64/boot/dts/broadcom/bcm2712.dtsi          |  91 ++
- arch/arm64/boot/dts/broadcom/rp1-common.dtsi       | 128 +++
+ .../boot/dts/broadcom/bcm2712-rpi-5-b-base.dtsi    |  41 ++
+ arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts   |  34 ++
+ arch/arm64/boot/dts/broadcom/bcm2712.dtsi          |  91 ++++
+ arch/arm64/boot/dts/broadcom/rp1-common.dtsi       | 128 +++++
  arch/arm64/kernel/setup.c                          |  27 +
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
  arch/x86/kernel/setup.c                            |  22 +-
- crypto/af_alg.c                                    |  76 +-
  crypto/akcipher.c                                  |   3 +-
- crypto/algif_aead.c                                |  11 +
- crypto/algif_hash.c                                |  24 +
- crypto/algif_rng.c                                 |   9 +
- crypto/algif_skcipher.c                            |  27 +-
+ crypto/algif_hash.c                                |   2 +-
  crypto/dh.c                                        |  25 +
  crypto/seqiv.c                                     |  15 +-
  crypto/sig.c                                       |   3 +-
@@ -36,137 +29,56 @@
  drivers/ata/libahci.c                              |  18 +
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
- drivers/char/random.c                              | 128 ++-
  drivers/firmware/efi/Makefile                      |   1 +
- drivers/firmware/efi/efi.c                         | 124 ++-
+ drivers/firmware/efi/efi.c                         | 124 +++--
  drivers/firmware/efi/libstub/fdt.c                 |   5 +
  drivers/firmware/efi/libstub/secureboot.c          |  14 +-
- drivers/firmware/efi/secureboot.c                  |  38 +
+ drivers/firmware/efi/secureboot.c                  |  38 ++
+ drivers/firmware/raspberrypi.c                     |  24 +
+ drivers/gpu/drm/vc4/vc4_bo.c                       |   3 +-
+ drivers/gpu/drm/vc4/vc4_drv.c                      |  29 --
+ drivers/gpu/drm/vc4/vc4_hvs.c                      |  10 +
+ drivers/gpu/drm/vc4/vc4_v3d.c                      |   7 +
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +
  drivers/iommu/Kconfig                              |  15 +
  drivers/iommu/Makefile                             |   1 +
- drivers/iommu/bcm2712-iommu-cache.c                |  84 ++
+ drivers/iommu/bcm2712-iommu-cache.c                |  84 ++++
  drivers/iommu/bcm2712-iommu-cache.h                |   9 +
- drivers/iommu/bcm2712-iommu.c                      | 550 ++++++++++++
+ drivers/iommu/bcm2712-iommu.c                      | 550 +++++++++++++++++++++
  drivers/iommu/generic_pt/.kunitconfig              |   1 +
  drivers/iommu/generic_pt/Kconfig                   |  10 +
  drivers/iommu/generic_pt/fmt/Makefile              |   2 +
- drivers/iommu/generic_pt/fmt/bcm2712.h             | 288 +++++++
+ drivers/iommu/generic_pt/fmt/bcm2712.h             | 288 +++++++++++
  drivers/iommu/generic_pt/fmt/defs_bcm2712.h        |  18 +
  drivers/iommu/generic_pt/fmt/iommu_bcm2712.c       |   6 +
  drivers/iommu/generic_pt/kunit_iommu_pt.h          |   2 +-
  drivers/iommu/iommu.c                              |  22 +
- drivers/media/i2c/Kconfig                          |  10 +
- drivers/media/i2c/Makefile                         |   1 +
- drivers/media/i2c/cvs/core.c                       |  26 +-
- drivers/media/i2c/cvs/icvs.h                       |   2 -
- drivers/media/i2c/cvs/v4l2.c                       |  17 +-
- drivers/media/i2c/imx471.c                         | 957 +++++++++++++++++++++
- drivers/media/pci/intel/ipu-bridge.c               |  48 ++
  drivers/pci/quirks.c                               |  24 +
- drivers/platform/x86/intel/int3472/discrete.c      | 110 ++-
  drivers/pwm/Kconfig                                |   7 +
  drivers/pwm/Makefile                               |   1 +
- drivers/pwm/pwm-rp1.c                              | 428 +++++++++
- drivers/soundwire/dmi-quirks.c                     |   7 +
+ drivers/pwm/pwm-rp1.c                              | 428 ++++++++++++++++
+ drivers/rtc/Kconfig                                |  12 +
+ drivers/rtc/Makefile                               |   1 +
+ drivers/rtc/rtc-raspberrypi.c                      | 278 +++++++++++
  drivers/usb/core/hub.c                             |   7 +
- include/crypto/if_alg.h                            |  42 +-
  include/linux/crypto.h                             |   2 +
  include/linux/efi.h                                |  22 +-
  include/linux/generic_pt/common.h                  |   6 +
  include/linux/generic_pt/iommu.h                   |  12 +
  include/linux/lsm_hook_defs.h                      |   1 +
- include/linux/random.h                             |  10 +
  include/linux/security.h                           |   9 +
+ include/soc/bcm2835/raspberrypi-firmware.h         |   2 +
  kernel/module/signing.c                            |   9 +-
- net/core/page_pool.c                               |   3 +-
  scripts/Makefile.lib                               |   3 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- sound/hda/codecs/realtek/alc269.c                  |  35 +
- sound/soc/sof/ipc4-topology.c                      |   9 +-
- tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++
- tools/testing/selftests/bpf/Makefile               |   2 +-
- tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 92 files changed, 4020 insertions(+), 199 deletions(-)
+ tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
+ tools/testing/selftests/bpf/Makefile               |   4 +-
+ tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
+ 79 files changed, 2848 insertions(+), 138 deletions(-)
 
-diff --git a/Documentation/admin-guide/sysctl/crypto.rst b/Documentation/admin-guide/sysctl/crypto.rst
-index b707bd314a64..9a1bd53287f4 100644
---- a/Documentation/admin-guide/sysctl/crypto.rst
-+++ b/Documentation/admin-guide/sysctl/crypto.rst
-@@ -7,6 +7,42 @@ kernel configuration:
- 
- .. contents:: :local:
- 
-+.. _af_alg_restrict:
-+
-+af_alg_restrict
-+===============
-+
-+Controls the level of restriction of AF_ALG.
-+
-+AF_ALG is a deprecated and rarely-used userspace interface that is a
-+frequent source of vulnerabilities. It also unnecessarily exposes a
-+large number of kernel implementation details. For more information
-+about AF_ALG, see :ref:`Documentation/crypto/userspace-if.rst
-+<crypto_userspace_interface>`.
-+
-+Starting in Linux v7.3, AF_ALG supports only a limited set of
-+algorithms by default. This sysctl allows the system administrator to
-+remove this restriction when needed for compatibility reasons, or to
-+go further and disable AF_ALG entirely. The default value is 1.
-+
-+===  ==================================================================
-+0    AF_ALG is unrestricted.
-+
-+1    AF_ALG is supported with a limited list of algorithms. The list
-+     is designed for compatibility with known users such as iwd and
-+     bluez that haven't yet been fixed to use userspace crypto code.
-+
-+     Specifically, there is an allowlist for unprivileged processes
-+     and a somewhat longer allowlist for processes that hold
-+     CAP_SYS_ADMIN or CAP_NET_ADMIN in the initial user namespace.
-+
-+     Attempts to bind() an AF_ALG socket with a disallowed algorithm
-+     fail with ENOENT.
-+
-+2    AF_ALG is completely disabled. Attempts to create an AF_ALG
-+     socket fail with EAFNOSUPPORT.
-+===  ==================================================================
-+
- fips_enabled
- ============
- 
-diff --git a/Documentation/crypto/userspace-if.rst b/Documentation/crypto/userspace-if.rst
-index ab93300c8e04..d6194346e366 100644
---- a/Documentation/crypto/userspace-if.rst
-+++ b/Documentation/crypto/userspace-if.rst
-@@ -1,3 +1,5 @@
-+.. _crypto_userspace_interface:
-+
- User Space Interface
- ====================
- 
-@@ -12,9 +14,14 @@ AF_ALG is insecure and is deprecated. Originally added to the kernel in 2010,
- most kernel developers now consider it to be a mistake. Support for hardware
- accelerators, which was the original purpose of AF_ALG, has been removed.
- 
--AF_ALG continues to be supported only for backwards compatibility. On systems
--where no programs using AF_ALG remain, the support for it should be disabled by
--disabling ``CONFIG_CRYPTO_USER_API_*``.
-+AF_ALG continues to be supported only for backwards compatibility.
-+
-+Starting in Linux v7.3, the set of algorithms supported by AF_ALG is limited by
-+default. See :ref:`/proc/sys/crypto/af_alg_restrict <af_alg_restrict>`.
-+
-+On systems where no programs using AF_ALG remain, the support for it should be
-+disabled entirely by setting ``/proc/sys/crypto/af_alg_restrict`` to 2 or by
-+disabling ``CONFIG_CRYPTO_USER_API_*`` in the kernel configuration.
- 
- Deprecation
- -----------
 diff --git a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml b/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
 index 2729a542c4f3..7ad6583f7fae 100644
 --- a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
@@ -377,10 +289,10 @@ index 000000000000..be020583fd0b
 +      #pwm-cells = <3>;
 +    };
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 95cd976a068c..797dade0f92b 100644
+index 782389bd5cd3..33671e98b824 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -5111,6 +5111,18 @@ N:	bcm2712
+@@ -5167,6 +5167,18 @@ N:	bcm2712
  N:	bcm283*
  N:	raspberrypi
  
@@ -399,21 +311,8 @@ index 95cd976a068c..797dade0f92b 100644
  BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITECTURE
  M:	Florian Fainelli <florian.fainelli@broadcom.com>
  M:	Ray Jui <rjui@broadcom.com>
-@@ -25262,6 +25274,12 @@ T:	git git://linuxtv.org/media.git
- F:	Documentation/devicetree/bindings/media/i2c/sony,imx415.yaml
- F:	drivers/media/i2c/imx415.c
- 
-+SONY IMX471 SENSOR DRIVER
-+M:	Kate Hsuan <hpa@redhat.com>
-+L:	linux-media@vger.kernel.org
-+S:	Maintained
-+F:	drivers/media/i2c/imx471.c
-+
- SONY MEMORYSTICK SUBSYSTEM
- M:	Maxim Levitsky <maximlevitsky@gmail.com>
- M:	Alex Dubov <oakad@yahoo.com>
 diff --git a/Makefile b/Makefile
-index a550506403fe..7045744faf6a 100644
+index a8f35bdca5d4..792c1b4742cc 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -434,7 +333,7 @@ index a550506403fe..7045744faf6a 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1443,6 +1454,8 @@ uapi-asm-generic:
+@@ -1449,6 +1460,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -443,7 +342,22 @@ index a550506403fe..7045744faf6a 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -2119,6 +2132,23 @@ endif
+@@ -1473,7 +1486,13 @@ define filechk_version.h
+ 	((c) > 255 ? 255 : (c)))';                                       \
+ 	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
+ 	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
+-	echo \#define LINUX_VERSION_SUBLEVEL $(SUBLEVEL)
++	echo \#define LINUX_VERSION_SUBLEVEL $(SUBLEVEL);                \
++	echo '#define RHEL_MAJOR $(RHEL_MAJOR)'; \
++	echo '#define RHEL_MINOR $(RHEL_MINOR)'; \
++	echo '#define RHEL_RELEASE_VERSION(a,b) (((a) << 8) + (b))'; \
++	echo '#define RHEL_RELEASE_CODE \
++		$(shell expr $(RHEL_MAJOR) \* 256 + $(RHEL_MINOR))'; \
++	echo '#define RHEL_RELEASE "$(RHEL_RELEASE)"'
+ endef
+ 
+ $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
+@@ -2150,6 +2169,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -467,22 +381,6 @@ index a550506403fe..7045744faf6a 100644
  modules.order: $(build-dir)
  	@:
  
-diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index bcb53bc9b931..3eecab4784e9 100644
---- a/arch/arm/Kconfig
-+++ b/arch/arm/Kconfig
-@@ -1217,9 +1217,9 @@ config HIGHMEM
- 	  If unsure, say n.
- 
- config HIGHPTE
--	bool "Allocate 2nd-level pagetables from highmem" if EXPERT
-+	bool "Allocate 2nd-level pagetables from highmem"
- 	depends on HIGHMEM && !PREEMPT_RT
--	default y
-+	default n
- 	help
- 	  The VM uses one page of physical memory for each page table.
- 	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
 index 1f4ebec68370..4f81fbdb85b5 100644
 --- a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
@@ -527,10 +425,10 @@ index 1f4ebec68370..4f81fbdb85b5 100644
  };
  
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 89b6a7dc6d32..35f169143b2a 100644
+index cab741a695f5..f7beaea5c213 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1519,7 +1519,7 @@ endchoice
+@@ -1573,7 +1573,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -699,7 +597,7 @@ index 0fc57e72632e..75b262e292cd 100644
  	pinctrl-0 = <&usb_vbus_default_state>;
  	pinctrl-names = "default";
 diff --git a/arch/arm64/boot/dts/broadcom/bcm2712.dtsi b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
-index 09ff5e9959d3..5ae9a96d8054 100644
+index 45aa8ec5e2b1..edae2f3584a8 100644
 --- a/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
 +++ b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
 @@ -10,6 +10,15 @@ / {
@@ -1041,7 +939,7 @@ index 16f535939583..980a5f3b231e 100644
  	};
  
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 23c05dc7a8f2..d7b7b2f39e16 100644
+index 29c6100f0c50..fecb897b1457 100644
 --- a/arch/arm64/kernel/setup.c
 +++ b/arch/arm64/kernel/setup.c
 @@ -32,6 +32,8 @@
@@ -1105,10 +1003,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 68fdd5616dfe..c03ebc73a985 100644
+index b1e798f8e1dd..c11298f71f62 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2533,3 +2533,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2551,3 +2551,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -1140,10 +1038,10 @@ index b60284328fe3..e4d37b08ca29 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 46882ce79c3a..9c73814c31e0 100644
+index cda6adb9f69c..3c35792b0353 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
-@@ -21,6 +21,7 @@
+@@ -23,6 +23,7 @@
  #include <linux/pci.h>
  #include <linux/random.h>
  #include <linux/root_dev.h>
@@ -1151,7 +1049,7 @@ index 46882ce79c3a..9c73814c31e0 100644
  #include <linux/static_call.h>
  #include <linux/sysfb.h>
  #include <linux/swiotlb.h>
-@@ -995,6 +996,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -1007,6 +1008,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -1165,7 +1063,7 @@ index 46882ce79c3a..9c73814c31e0 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1156,19 +1164,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1168,19 +1176,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -1186,140 +1084,6 @@ index 46882ce79c3a..9c73814c31e0 100644
  
  	reserve_initrd();
  
-diff --git a/crypto/af_alg.c b/crypto/af_alg.c
-index cce000e8590e..ab84c4488a15 100644
---- a/crypto/af_alg.c
-+++ b/crypto/af_alg.c
-@@ -8,6 +8,7 @@
-  */
- 
- #include <linux/atomic.h>
-+#include <linux/capability.h>
- #include <crypto/if_alg.h>
- #include <linux/crypto.h>
- #include <linux/init.h>
-@@ -22,10 +23,28 @@
- #include <linux/sched/signal.h>
- #include <linux/security.h>
- #include <linux/string.h>
-+#include <linux/sysctl.h>
-+#include <linux/user_namespace.h>
- #include <keys/user-type.h>
- #include <keys/trusted-type.h>
- #include <keys/encrypted-type.h>
- 
-+static int af_alg_restrict = 1;
-+
-+static const struct ctl_table af_alg_table[] = {
-+	{
-+		.procname       = "af_alg_restrict",
-+		.data           = &af_alg_restrict,
-+		.maxlen         = sizeof(int),
-+		.mode           = 0644,
-+		.proc_handler   = proc_dointvec_minmax,
-+		.extra1		= SYSCTL_ZERO,
-+		.extra2		= SYSCTL_TWO,
-+	},
-+};
-+
-+static struct ctl_table_header *af_alg_header;
-+
- struct alg_type_list {
- 	const struct af_alg_type *type;
- 	struct list_head list;
-@@ -110,6 +129,43 @@ int af_alg_unregister_type(const struct af_alg_type *type)
- }
- EXPORT_SYMBOL_GPL(af_alg_unregister_type);
- 
-+static bool af_alg_capable(void)
-+{
-+	return ns_capable_noaudit(&init_user_ns, CAP_NET_ADMIN) ||
-+	       capable(CAP_SYS_ADMIN);
-+}
-+
-+int af_alg_check_restriction(const char *name,
-+			     const struct af_alg_allowlist_entry allowlist[])
-+{
-+	int level = READ_ONCE(af_alg_restrict);
-+
-+	if (level == 0)
-+		return 0;
-+	if (level == 1) {
-+		for (const struct af_alg_allowlist_entry *ent = allowlist;
-+		     ent->name; ent++) {
-+			if (strcmp(name, ent->name) == 0) {
-+				if ((ent->flags & AF_ALG_UNPRIVILEGED) ||
-+				    af_alg_capable())
-+					return 0;
-+				/* List contains at most one entry per name. */
-+				break;
-+			}
-+		}
-+	}
-+	/*
-+	 * Use -ENOENT (the error code for "algorithm not found") instead of
-+	 * -EACCES or -EPERM, for the highest chance of correctly triggering
-+	 * fallback code paths in userspace programs.
-+	 *
-+	 * Don't log a warning, since it would be noisy.  iwd tries to bind a
-+	 * bunch of algorithms that it never uses.
-+	 */
-+	return -ENOENT;
-+}
-+EXPORT_SYMBOL_GPL(af_alg_check_restriction);
-+
- static void alg_do_release(const struct af_alg_type *type, void *private)
- {
- 	if (!type)
-@@ -506,6 +562,9 @@ static int alg_create(struct net *net, struct socket *sock, int protocol,
- 	struct sock *sk;
- 	int err;
- 
-+	if (READ_ONCE(af_alg_restrict) == 2)
-+		return -EAFNOSUPPORT;
-+
- 	if (sock->type != SOCK_SEQPACKET)
- 		return -ESOCKTNOSUPPORT;
- 	if (protocol != 0)
-@@ -1222,27 +1281,32 @@ EXPORT_SYMBOL_GPL(af_alg_get_rsgl);
- 
- static int __init af_alg_init(void)
- {
--	int err = proto_register(&alg_proto, 0);
-+	int err;
-+
-+	af_alg_header = register_sysctl("crypto", af_alg_table);
- 
-+	err = proto_register(&alg_proto, 0);
- 	if (err)
--		goto out;
-+		goto out_unregister_sysctl;
- 
- 	err = sock_register(&alg_family);
--	if (err != 0)
-+	if (err)
- 		goto out_unregister_proto;
- 
--out:
--	return err;
-+	return 0;
- 
- out_unregister_proto:
- 	proto_unregister(&alg_proto);
--	goto out;
-+out_unregister_sysctl:
-+	unregister_sysctl_table(af_alg_header);
-+	return err;
- }
- 
- static void __exit af_alg_exit(void)
- {
- 	sock_unregister(PF_ALG);
- 	proto_unregister(&alg_proto);
-+	unregister_sysctl_table(af_alg_header);
- }
- 
- module_init(af_alg_init);
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
 index 630bb19738be..8da7eedce31e 100644
 --- a/crypto/akcipher.c
@@ -1334,151 +1098,19 @@ index 630bb19738be..8da7eedce31e 100644
  	if (!alg->set_priv_key)
  		alg->set_priv_key = akcipher_default_set_key;
  
-diff --git a/crypto/algif_aead.c b/crypto/algif_aead.c
-index 787aac8aeb24..5574e2d70539 100644
---- a/crypto/algif_aead.c
-+++ b/crypto/algif_aead.c
-@@ -34,6 +34,11 @@
- #include <linux/net.h>
- #include <net/sock.h>
- 
-+static const struct af_alg_allowlist_entry aead_allowlist[] = {
-+	{ "ccm(aes)" }, /* bluez */
-+	{},
-+};
-+
- static inline bool aead_sufficient_data(struct sock *sk)
- {
- 	struct alg_sock *ask = alg_sk(sk);
-@@ -344,6 +349,12 @@ static struct proto_ops algif_aead_ops_nokey = {
- 
- static void *aead_bind(const char *name)
- {
-+	int err;
-+
-+	err = af_alg_check_restriction(name, aead_allowlist);
-+	if (err)
-+		return ERR_PTR(err);
-+
- 	return crypto_alloc_aead(name, 0, AF_ALG_CRYPTOAPI_MASK);
- }
- 
 diff --git a/crypto/algif_hash.c b/crypto/algif_hash.c
-index 5452ad6c1506..0d3ec5760de6 100644
+index 6e8b5fb82a7f..0d3ec5760de6 100644
 --- a/crypto/algif_hash.c
 +++ b/crypto/algif_hash.c
-@@ -16,6 +16,24 @@
- #include <linux/net.h>
- #include <net/sock.h>
- 
-+static const struct af_alg_allowlist_entry hash_allowlist[] = {
-+	{ "cmac(aes)" }, /* iwd, bluez */
-+	{ "hmac(md5)" }, /* iwd */
-+	{ "hmac(sha1)" }, /* iwd */
-+	{ "hmac(sha224)" }, /* iwd */
-+	{ "hmac(sha256)" }, /* iwd */
-+	{ "hmac(sha384)" }, /* iwd */
+@@ -23,7 +23,7 @@ static const struct af_alg_allowlist_entry hash_allowlist[] = {
+ 	{ "hmac(sha224)" }, /* iwd */
+ 	{ "hmac(sha256)" }, /* iwd */
+ 	{ "hmac(sha384)" }, /* iwd */
+-	{ "hmac(sha512)" }, /* iwd, sha512hmac */
 +	{ "hmac(sha512)", AF_ALG_UNPRIVILEGED }, /* iwd, sha512hmac */
-+	{ "md4" }, /* iwd */
-+	{ "md5" }, /* iwd */
-+	{ "sha1", AF_ALG_UNPRIVILEGED }, /* iwd, iproute2 < 7.0 */
-+	{ "sha224" }, /* iwd */
-+	{ "sha256" }, /* iwd */
-+	{ "sha384" }, /* iwd */
-+	{ "sha512" }, /* iwd */
-+	{},
-+};
-+
- struct hash_ctx {
- 	struct af_alg_sgl sgl;
- 
-@@ -382,6 +400,12 @@ static struct proto_ops algif_hash_ops_nokey = {
- 
- static void *hash_bind(const char *name)
- {
-+	int err;
-+
-+	err = af_alg_check_restriction(name, hash_allowlist);
-+	if (err)
-+		return ERR_PTR(err);
-+
- 	return crypto_alloc_ahash(name, 0, AF_ALG_CRYPTOAPI_MASK);
- }
- 
-diff --git a/crypto/algif_rng.c b/crypto/algif_rng.c
-index 4dfe7899f8fa..bd522915d56d 100644
---- a/crypto/algif_rng.c
-+++ b/crypto/algif_rng.c
-@@ -50,6 +50,10 @@ MODULE_LICENSE("GPL");
- MODULE_AUTHOR("Stephan Mueller <smueller@chronox.de>");
- MODULE_DESCRIPTION("User-space interface for random number generators");
- 
-+static const struct af_alg_allowlist_entry rng_allowlist[] = {
-+	{},
-+};
-+
- struct rng_ctx {
- #define MAXSIZE 128
- 	unsigned int len;
-@@ -201,6 +205,11 @@ static void *rng_bind(const char *name)
- {
- 	struct rng_parent_ctx *pctx;
- 	struct crypto_rng *rng;
-+	int err;
-+
-+	err = af_alg_check_restriction(name, rng_allowlist);
-+	if (err)
-+		return ERR_PTR(err);
- 
- 	pctx = kzalloc_obj(*pctx);
- 	if (!pctx)
-diff --git a/crypto/algif_skcipher.c b/crypto/algif_skcipher.c
-index 035fed7db81f..d469a3ec1491 100644
---- a/crypto/algif_skcipher.c
-+++ b/crypto/algif_skcipher.c
-@@ -35,6 +35,24 @@
- #include <linux/string.h>
- #include <net/sock.h>
- 
-+static const struct af_alg_allowlist_entry skcipher_allowlist[] = {
-+	{ "adiantum(xchacha12,aes)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{ "adiantum(xchacha20,aes)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{ "cbc(aes)" }, /* iwd */
-+	{ "cbc(des)" }, /* iwd */
-+	{ "cbc(des3_ede)" }, /* iwd */
-+	{ "cbc(paes)" }, /* caam and others */
-+	{ "ctr(aes)" }, /* iwd */
-+	{ "ecb(aes)" }, /* iwd, bluez */
-+	{ "ecb(des)" }, /* iwd */
-+	{ "hctr2(aes)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{ "xts(aes)", AF_ALG_UNPRIVILEGED }, /* cryptsetup benchmark */
-+	{ "xts(camellia)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{ "xts(serpent)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{ "xts(twofish)", AF_ALG_UNPRIVILEGED }, /* cryptsetup */
-+	{},
-+};
-+
- static int skcipher_sendmsg(struct socket *sock, struct msghdr *msg,
- 			    size_t size)
- {
-@@ -310,12 +328,13 @@ static struct proto_ops algif_skcipher_ops_nokey = {
- 
- static void *skcipher_bind(const char *name)
- {
--	u32 mask = AF_ALG_CRYPTOAPI_MASK;
-+	int err;
- 
--	if (strcmp(name, "cbc(paes)") == 0)
--		mask = 0;
-+	err = af_alg_check_restriction(name, skcipher_allowlist);
-+	if (err)
-+		return ERR_PTR(err);
- 
--	return crypto_alloc_skcipher(name, 0, mask);
-+	return crypto_alloc_skcipher(name, 0, AF_ALG_CRYPTOAPI_MASK);
- }
- 
- static void skcipher_release(void *private)
+ 	{ "md4" }, /* iwd */
+ 	{ "md5" }, /* iwd */
+ 	{ "sha1", AF_ALG_UNPRIVILEGED }, /* iwd, iproute2 < 7.0 */
 diff --git a/crypto/dh.c b/crypto/dh.c
 index 7ad4768716c8..01ccc24db074 100644
 --- a/crypto/dh.c
@@ -1623,10 +1255,10 @@ index 20d757687e3d..90a13f20f052 100644
  	for (i = 0; i < hest_tab->error_source_count; i++) {
  		len = hest_esrc_len(hest_hdr);
 diff --git a/drivers/acpi/irq.c b/drivers/acpi/irq.c
-index d1595156c86a..9485212f1a6d 100644
+index a670722ddd5a..748d1250a852 100644
 --- a/drivers/acpi/irq.c
 +++ b/drivers/acpi/irq.c
-@@ -143,6 +143,7 @@ struct acpi_irq_parse_one_ctx {
+@@ -144,6 +144,7 @@ struct acpi_irq_parse_one_ctx {
  	unsigned int index;
  	unsigned long *res_flags;
  	struct irq_fwspec *fwspec;
@@ -1634,7 +1266,7 @@ index d1595156c86a..9485212f1a6d 100644
  };
  
  /**
-@@ -216,7 +217,8 @@ static acpi_status acpi_irq_parse_one_cb(struct acpi_resource *ares,
+@@ -217,7 +218,8 @@ static acpi_status acpi_irq_parse_one_cb(struct acpi_resource *ares,
  		return AE_CTRL_TERMINATE;
  	case ACPI_RESOURCE_TYPE_EXTENDED_IRQ:
  		eirq = &ares->data.extended_irq;
@@ -1644,7 +1276,7 @@ index d1595156c86a..9485212f1a6d 100644
  			return AE_OK;
  		if (ctx->index >= eirq->interrupt_count) {
  			ctx->index -= eirq->interrupt_count;
-@@ -252,8 +254,19 @@ static acpi_status acpi_irq_parse_one_cb(struct acpi_resource *ares,
+@@ -253,8 +255,19 @@ static acpi_status acpi_irq_parse_one_cb(struct acpi_resource *ares,
  static int acpi_irq_parse_one(acpi_handle handle, unsigned int index,
  			      struct irq_fwspec *fwspec, unsigned long *flags)
  {
@@ -1666,10 +1298,10 @@ index d1595156c86a..9485212f1a6d 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 99af95f33865..2d7e7ff78354 100644
+index 163a3cccf197..cce23a1b5d71 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1799,6 +1799,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1796,6 +1796,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1741,7 +1373,7 @@ index 505e32911c34..26f7ee0ccf40 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 0330d8412a0e..46babed7a863 100644
+index 152dd6b5bb27..e1ceb726eb51 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1752,7 +1384,7 @@ index 0330d8412a0e..46babed7a863 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5647,8 +5648,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5648,8 +5649,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
@@ -1775,219 +1407,6 @@ index 0330d8412a0e..46babed7a863 100644
  	mutex_lock(&ipmi_interfaces_mutex);
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
-diff --git a/drivers/char/random.c b/drivers/char/random.c
-index b4da1fb976c1..7ff4dd4d9836 100644
---- a/drivers/char/random.c
-+++ b/drivers/char/random.c
-@@ -51,9 +51,11 @@
- #include <linux/completion.h>
- #include <linux/uuid.h>
- #include <linux/uaccess.h>
-+#include <linux/rcupdate.h>
- #include <linux/suspend.h>
- #include <linux/siphash.h>
- #include <linux/sched/isolation.h>
-+#include <linux/fips.h>
- #include <crypto/chacha.h>
- #include <crypto/blake2s.h>
- #include <vdso/datapage.h>
-@@ -320,6 +322,11 @@ static void crng_fast_key_erasure(u8 key[CHACHA_KEY_SIZE],
- 	memzero_explicit(first_block, sizeof(first_block));
- }
- 
-+/*
-+ * Hook for external RNG.
-+ */
-+static const struct random_extrng __rcu *extrng;
-+
- /*
-  * This function returns a ChaCha state that you may use for generating
-  * random data. It also returns up to 32 bytes on its own of random data
-@@ -732,7 +739,8 @@ static void __cold _credit_init_bits(size_t bits)
- 			queue_work(system_dfl_wq, &set_ready);
- 		atomic_notifier_call_chain(&random_ready_notifier, 0, NULL);
- 		if (IS_ENABLED(CONFIG_VDSO_GETRANDOM))
--			WRITE_ONCE(vdso_k_rng_data->is_ready, true);
-+			if (!fips_enabled)
-+				WRITE_ONCE(vdso_k_rng_data->is_ready, true);
- 		wake_up_interruptible(&crng_init_wait);
- 		kill_fasync(&fasync, SIGIO, POLL_IN);
- 		pr_notice("crng init done\n");
-@@ -751,6 +759,9 @@ static void __cold _credit_init_bits(size_t bits)
- }
- 
- 
-+static const struct file_operations extrng_random_fops;
-+static const struct file_operations extrng_urandom_fops;
-+
- /**********************************************************************
-  *
-  * Entropy collection routines.
-@@ -967,6 +978,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
- 		credit_init_bits(len * 8);
- }
- 
-+void random_register_extrng(const struct random_extrng *rng)
-+{
-+	rcu_assign_pointer(extrng, rng);
-+}
-+EXPORT_SYMBOL_GPL(random_register_extrng);
-+
-+void random_unregister_extrng(void)
-+{
-+	RCU_INIT_POINTER(extrng, NULL);
-+	synchronize_rcu();
-+}
-+EXPORT_SYMBOL_GPL(random_unregister_extrng);
-+
- #if IS_ENABLED(CONFIG_VMGENID)
- static BLOCKING_NOTIFIER_HEAD(vmfork_chain);
- 
-@@ -1381,6 +1405,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
- {
- 	struct iov_iter iter;
- 	int ret;
-+	const struct random_extrng *rng;
- 
- 	if (flags & ~(GRND_NONBLOCK | GRND_RANDOM | GRND_INSECURE))
- 		return -EINVAL;
-@@ -1392,6 +1417,23 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
- 	if ((flags & (GRND_INSECURE | GRND_RANDOM)) == (GRND_INSECURE | GRND_RANDOM))
- 		return -EINVAL;
- 
-+	rcu_read_lock();
-+	rng = rcu_dereference(extrng);
-+	if (rng && !try_module_get(rng->owner))
-+		rng = NULL;
-+	rcu_read_unlock();
-+
-+	if (rng) {
-+		ret = import_ubuf(ITER_DEST, ubuf, len, &iter);
-+		if (unlikely(ret)) {
-+			module_put(rng->owner);
-+			return ret;
-+		}
-+		ret = rng->extrng_read_iter(&iter, !!(flags & GRND_RANDOM));
-+		module_put(rng->owner);
-+		return ret;
-+	}
-+
- 	if (!crng_ready() && !(flags & GRND_INSECURE)) {
- 		if (flags & GRND_NONBLOCK)
- 			return -EAGAIN;
-@@ -1412,6 +1454,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
- 	return crng_ready() ? EPOLLIN | EPOLLRDNORM : EPOLLOUT | EPOLLWRNORM;
- }
- 
-+static __poll_t extrng_poll(struct file *file, poll_table * wait)
-+{
-+	/* extrng pool is always full, always read, no writes */
-+	return EPOLLIN | EPOLLRDNORM;
-+}
-+
- static ssize_t write_pool_user(struct iov_iter *iter)
- {
- 	u8 block[BLAKE2S_BLOCK_SIZE];
-@@ -1552,7 +1600,58 @@ static int random_fasync(int fd, struct file *filp, int on)
- 	return fasync_helper(fd, filp, on, &fasync);
- }
- 
-+static int random_open(struct inode *inode, struct file *filp)
-+{
-+	const struct random_extrng *rng;
-+
-+	rcu_read_lock();
-+	rng = rcu_dereference(extrng);
-+	if (rng && !try_module_get(rng->owner))
-+		rng = NULL;
-+	rcu_read_unlock();
-+
-+	if (!rng)
-+		return 0;
-+
-+	filp->f_op = &extrng_random_fops;
-+	filp->private_data = rng->owner;
-+
-+	return 0;
-+}
-+
-+static int urandom_open(struct inode *inode, struct file *filp)
-+{
-+	const struct random_extrng *rng;
-+
-+	rcu_read_lock();
-+	rng = rcu_dereference(extrng);
-+	if (rng && !try_module_get(rng->owner))
-+		rng = NULL;
-+	rcu_read_unlock();
-+
-+	if (!rng)
-+		return 0;
-+
-+	filp->f_op = &extrng_urandom_fops;
-+	filp->private_data = rng->owner;
-+
-+	return 0;
-+}
-+
-+static int extrng_release(struct inode *inode, struct file *filp)
-+{
-+	module_put(filp->private_data);
-+	return 0;
-+}
-+
-+static ssize_t
-+extrng_read_iter(struct kiocb *kiocb, struct iov_iter *iter)
-+{
-+	return rcu_dereference_raw(extrng)->extrng_read_iter(iter, false);
-+}
-+
- const struct file_operations random_fops = {
-+	.open  = random_open,
- 	.read_iter = random_read_iter,
- 	.write_iter = random_write_iter,
- 	.poll = random_poll,
-@@ -1565,6 +1664,7 @@ const struct file_operations random_fops = {
- };
- 
- const struct file_operations urandom_fops = {
-+	.open  = urandom_open,
- 	.read_iter = urandom_read_iter,
- 	.write_iter = random_write_iter,
- 	.unlocked_ioctl = random_ioctl,
-@@ -1575,6 +1675,32 @@ const struct file_operations urandom_fops = {
- 	.splice_write = iter_file_splice_write,
- };
- 
-+static const struct file_operations extrng_random_fops = {
-+	.open  = random_open,
-+	.read_iter  = extrng_read_iter,
-+	.write_iter = random_write_iter,
-+	.poll  = extrng_poll,
-+	.unlocked_ioctl = random_ioctl,
-+	.compat_ioctl = compat_ptr_ioctl,
-+	.fasync = random_fasync,
-+	.llseek = noop_llseek,
-+	.release = extrng_release,
-+	.splice_read = copy_splice_read,
-+	.splice_write = iter_file_splice_write,
-+};
-+
-+static const struct file_operations extrng_urandom_fops = {
-+	.open  = urandom_open,
-+	.read_iter  = extrng_read_iter,
-+	.write_iter = random_write_iter,
-+	.unlocked_ioctl = random_ioctl,
-+	.compat_ioctl = compat_ptr_ioctl,
-+	.fasync = random_fasync,
-+	.llseek = noop_llseek,
-+	.release = extrng_release,
-+	.splice_read = copy_splice_read,
-+	.splice_write = iter_file_splice_write,
-+};
- 
- /********************************************************************
-  *
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
 index 8efbcf699e4f..96d5a1ca981d 100644
 --- a/drivers/firmware/efi/Makefile
@@ -2241,6 +1660,185 @@ index 000000000000..de0a3714a5d4
 +		}
 +	}
 +}
+diff --git a/drivers/firmware/raspberrypi.c b/drivers/firmware/raspberrypi.c
+index 0aa322e9a2e7..443459c8c90f 100644
+--- a/drivers/firmware/raspberrypi.c
++++ b/drivers/firmware/raspberrypi.c
+@@ -24,6 +24,7 @@
+ 
+ static struct platform_device *rpi_hwmon;
+ static struct platform_device *rpi_clk;
++static struct platform_device *rpi_rtc;
+ 
+ struct rpi_firmware {
+ 	struct mbox_client cl;
+@@ -231,6 +232,26 @@ static void rpi_register_clk_driver(struct device *dev)
+ 						-1, NULL, 0);
+ }
+ 
++static void rpi_register_rtc_driver(struct device *dev)
++{
++	struct platform_device *pdev;
++
++	/*
++	 * Check if our model of Raspberry Pi board is from the 5th gen
++	 * as the RTC is only present on that model.
++	 */
++	if (!of_machine_is_compatible("brcm,bcm2712"))
++		return;
++
++	pdev = platform_device_register_data(dev, "raspberrypi-rtc",
++					     -1, NULL, 0);
++
++	if (IS_ERR(pdev))
++		return;
++
++	rpi_rtc = pdev;
++}
++
+ unsigned int rpi_firmware_clk_get_max_rate(struct rpi_firmware *fw, unsigned int id)
+ {
+ 	struct rpi_firmware_clk_rate_request msg =
+@@ -305,6 +326,7 @@ static int rpi_firmware_probe(struct platform_device *pdev)
+ 	rpi_firmware_print_firmware_revision(fw);
+ 	rpi_register_hwmon_driver(dev, fw);
+ 	rpi_register_clk_driver(dev);
++	rpi_register_rtc_driver(dev);
+ 
+ 	return 0;
+ }
+@@ -327,6 +349,8 @@ static void rpi_firmware_remove(struct platform_device *pdev)
+ 	rpi_hwmon = NULL;
+ 	platform_device_unregister(rpi_clk);
+ 	rpi_clk = NULL;
++	platform_device_unregister(rpi_rtc);
++	rpi_rtc = NULL;
+ 
+ 	rpi_firmware_put(fw);
+ }
+diff --git a/drivers/gpu/drm/vc4/vc4_bo.c b/drivers/gpu/drm/vc4/vc4_bo.c
+index 7b8b3364000f..da4b11b7ce9f 100644
+--- a/drivers/gpu/drm/vc4/vc4_bo.c
++++ b/drivers/gpu/drm/vc4/vc4_bo.c
+@@ -303,7 +303,8 @@ static void vc4_bo_purge(struct drm_gem_object *obj)
+ 
+ 	drm_vma_node_unmap(&obj->vma_node, dev->anon_inode->i_mapping);
+ 
+-	dma_free_wc(dev->dev, obj->size, bo->base.vaddr, bo->base.dma_addr);
++	dma_free_wc(drm_dev_dma_dev(dev), obj->size, bo->base.vaddr,
++		    bo->base.dma_addr);
+ 	bo->base.vaddr = NULL;
+ 	bo->madv = __VC4_MADV_PURGED;
+ }
+diff --git a/drivers/gpu/drm/vc4/vc4_drv.c b/drivers/gpu/drm/vc4/vc4_drv.c
+index 7b64e1ed02d4..6072b4e1ffed 100644
+--- a/drivers/gpu/drm/vc4/vc4_drv.c
++++ b/drivers/gpu/drm/vc4/vc4_drv.c
+@@ -24,10 +24,8 @@
+ #include <linux/clk.h>
+ #include <linux/component.h>
+ #include <linux/device.h>
+-#include <linux/dma-mapping.h>
+ #include <linux/io.h>
+ #include <linux/module.h>
+-#include <linux/of_device.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+ 
+@@ -273,16 +271,6 @@ static void vc4_component_unbind_all(void *ptr)
+ 	component_unbind_all(vc4->dev, &vc4->base);
+ }
+ 
+-static const struct of_device_id vc4_dma_range_matches[] = {
+-	{ .compatible = "brcm,bcm2711-hvs" },
+-	{ .compatible = "brcm,bcm2712-hvs" },
+-	{ .compatible = "brcm,bcm2835-hvs" },
+-	{ .compatible = "brcm,bcm2835-v3d" },
+-	{ .compatible = "brcm,cygnus-v3d" },
+-	{ .compatible = "brcm,vc4-v3d" },
+-	{}
+-};
+-
+ static int vc4_drm_bind(struct device *dev)
+ {
+ 	struct platform_device *pdev = to_platform_device(dev);
+@@ -295,8 +283,6 @@ static int vc4_drm_bind(struct device *dev)
+ 	enum vc4_gen gen;
+ 	int ret = 0;
+ 
+-	dev->coherent_dma_mask = DMA_BIT_MASK(32);
+-
+ 	gen = (enum vc4_gen)of_device_get_match_data(dev);
+ 
+ 	if (gen > VC4_GEN_4)
+@@ -304,21 +290,6 @@ static int vc4_drm_bind(struct device *dev)
+ 	else
+ 		driver = &vc4_drm_driver;
+ 
+-	if (gen >= VC4_GEN_6_C)
+-		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(36));
+-	else
+-		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
+-
+-	node = of_find_matching_node_and_match(NULL, vc4_dma_range_matches,
+-					       NULL);
+-	if (node) {
+-		ret = of_dma_configure(dev, node, true);
+-		of_node_put(node);
+-
+-		if (ret)
+-			return ret;
+-	}
+-
+ 	vc4 = devm_drm_dev_alloc(dev, driver, struct vc4_dev, base);
+ 	if (IS_ERR(vc4))
+ 		return PTR_ERR(vc4);
+diff --git a/drivers/gpu/drm/vc4/vc4_hvs.c b/drivers/gpu/drm/vc4/vc4_hvs.c
+index e715147d091c..b1fb096858cc 100644
+--- a/drivers/gpu/drm/vc4/vc4_hvs.c
++++ b/drivers/gpu/drm/vc4/vc4_hvs.c
+@@ -22,6 +22,7 @@
+ #include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/component.h>
++#include <linux/dma-mapping.h>
+ #include <linux/platform_device.h>
+ 
+ #include <drm/drm_atomic_helper.h>
+@@ -1662,6 +1663,15 @@ static int vc4_hvs_bind(struct device *dev, struct device *master, void *data)
+ 		hvs->regset.nregs = ARRAY_SIZE(vc4_hvs_regs);
+ 	}
+ 
++	if (vc4->gen >= VC4_GEN_6_C) {
++		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(36));
++		if (ret)
++			return ret;
++	}
++
++	if (drm_dev_dma_dev(drm) == drm->dev)
++		drm_dev_set_dma_dev(drm, dev);
++
+ 	if (vc4->gen >= VC4_GEN_5) {
+ 		struct rpi_firmware *firmware;
+ 		struct device_node *node;
+diff --git a/drivers/gpu/drm/vc4/vc4_v3d.c b/drivers/gpu/drm/vc4/vc4_v3d.c
+index 6844e8f3948c..1b8153c69737 100644
+--- a/drivers/gpu/drm/vc4/vc4_v3d.c
++++ b/drivers/gpu/drm/vc4/vc4_v3d.c
+@@ -441,6 +441,13 @@ static int vc4_v3d_bind(struct device *dev, struct device *master, void *data)
+ 	vc4->v3d = v3d;
+ 	v3d->vc4 = vc4;
+ 
++	/*
++	 * In headless setups where HVS is absent, use V3D as the fallback
++	 * DMA controller for buffer allocations.
++	 */
++	if (drm_dev_dma_dev(drm) == drm->dev)
++		drm_dev_set_dma_dev(drm, dev);
++
+ 	v3d->clk = devm_clk_get_optional(dev, NULL);
+ 	if (IS_ERR(v3d->clk))
+ 		return dev_err_probe(dev, PTR_ERR(v3d->clk), "Failed to get V3D clock\n");
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 index 2247ad55d444..5f9da88479e8 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
@@ -3030,7 +2628,7 @@ index f4ed1add58b7..2a81dac960ac 100644
  	help
  	  Enable kunit tests for GENERIC_PT and IOMMU_PT that covers all the
 diff --git a/drivers/iommu/generic_pt/fmt/Makefile b/drivers/iommu/generic_pt/fmt/Makefile
-index ea024d582594..82ca3c36823d 100644
+index e308760d02b7..a43f3b81d2db 100644
 --- a/drivers/iommu/generic_pt/fmt/Makefile
 +++ b/drivers/iommu/generic_pt/fmt/Makefile
 @@ -9,6 +9,8 @@ iommu_pt_fmt-$(CONFIG_IOMMU_PT_RISCV64) += riscv64
@@ -3386,7 +2984,7 @@ index ece1c9b8c55d..9fc71db74234 100644
  
  /* See https://lore.kernel.org/r/20250826143816.38686-1-eugkoira@amazon.com */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 23a531595835..2f8952a08112 100644
+index cd1bca7ede9a..821027f45794 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -3425,1236 +3023,11 @@ index 23a531595835..2f8952a08112 100644
  /**
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
-diff --git a/drivers/media/i2c/Kconfig b/drivers/media/i2c/Kconfig
-index 5d173e0ecf42..b7199f9f5a0c 100644
---- a/drivers/media/i2c/Kconfig
-+++ b/drivers/media/i2c/Kconfig
-@@ -287,6 +287,16 @@ config VIDEO_IMX415
- 	  To compile this driver as a module, choose M here: the
- 	  module will be called imx415.
- 
-+config VIDEO_IMX471
-+	tristate "Sony IMX471 sensor support"
-+	select V4L2_CCI_I2C
-+	help
-+	  This is a Video4Linux2 sensor driver for the Sony
-+	  IMX471 camera.
-+
-+	  To compile this driver as a module, choose M here: the
-+	  module will be called imx471.
-+
- config VIDEO_MAX9271_LIB
- 	tristate
- 
-diff --git a/drivers/media/i2c/Makefile b/drivers/media/i2c/Makefile
-index e45359efe0e4..acbd321fc12e 100644
---- a/drivers/media/i2c/Makefile
-+++ b/drivers/media/i2c/Makefile
-@@ -61,6 +61,7 @@ obj-$(CONFIG_VIDEO_IMX335) += imx335.o
- obj-$(CONFIG_VIDEO_IMX355) += imx355.o
- obj-$(CONFIG_VIDEO_IMX412) += imx412.o
- obj-$(CONFIG_VIDEO_IMX415) += imx415.o
-+obj-$(CONFIG_VIDEO_IMX471) += imx471.o
- obj-$(CONFIG_VIDEO_IR_I2C) += ir-kbd-i2c.o
- obj-$(CONFIG_VIDEO_ISL7998X) += isl7998x.o
- obj-$(CONFIG_VIDEO_KS0127) += ks0127.o
-diff --git a/drivers/media/i2c/cvs/core.c b/drivers/media/i2c/cvs/core.c
-index fe9e59ac311c..048c87fd9188 100644
---- a/drivers/media/i2c/cvs/core.c
-+++ b/drivers/media/i2c/cvs/core.c
-@@ -31,6 +31,7 @@
- 
- #define PCI_DEVICE_ID_INTEL_IPU7		0x645d	/* MTL / LNL */
- #define PCI_DEVICE_ID_INTEL_IPU7P5		0xb05d	/* ARL / PTL */
-+#define PCI_DEVICE_ID_INTEL_IPU8		0xd719	/* NVL */
- 
- /*
-  * IPU7 PCI device IDs not covered by ipu6_pci_tbl in ipu6-pci-table.h.
-@@ -39,6 +40,7 @@
- static const struct pci_device_id icvs_ipu7_tbl[] = {
- 	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_IPU7) },
- 	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_IPU7P5) },
-+	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_IPU8) },
- 	{ }
- };
- 
-@@ -68,6 +70,13 @@ static const struct icvs_device_quirk cvs_quirk_table[] = {
- 			  ICVS_NO_CAPS |
- 			  ICVS_NO_FW_UPDATE
- 	},	/* Lattice NX33 */
-+	{ 0x2ac1, 0x20d1, ICVS_NO_MIPI_CONFIG |
-+			  ICVS_NO_CAPS |
-+			  ICVS_NO_FW_UPDATE
-+	},	/*
-+		 * The Lattice device was found on a Dell laptop
-+		 * XPS 14 (Dell 14 Premium) DA14250
-+		 */
- 	{ 0x06CB, 0x0701, ICVS_SKIP_FW_RESET |
- 			  ICVS_HOST_SENSOR_PWR_CTRL |
- 			  ICVS_HOST_PRIV_CTRL |
-@@ -723,8 +732,6 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
- 	}
- 
- 	if (ctx->res == ICVS_FULLCAP) {
--		struct gpio_desc *wake;
--
- 		ctx->rst = devm_gpiod_get(dev, "rst", GPIOD_OUT_HIGH);
- 		if (IS_ERR(ctx->rst)) {
- 			ret = dev_err_probe(dev, PTR_ERR(ctx->rst),
-@@ -732,14 +739,12 @@ static int cvs_core_probe(struct device *dev, struct i2c_client *i2c)
- 			goto err_put_ipu;
- 		}
- 
--		wake = devm_gpiod_get(dev, "wake", GPIOD_IN);
--		if (IS_ERR(wake)) {
--			ret = dev_err_probe(dev, PTR_ERR(wake),
--					    "failed to get wake GPIO\n");
--			goto err_put_ipu;
--		}
--
--		ctx->irq = gpiod_to_irq(wake);
-+		/*
-+		 * Do not request the line: another device's _CRS may list
-+		 * the same pin, and its driver would then fail with -EBUSY.
-+		 */
-+		ctx->irq = acpi_dev_gpio_irq_get_by(ACPI_COMPANION(dev),
-+						    "wake", 0);
- 		if (ctx->irq < 0) {
- 			ret = dev_err_probe(dev, ctx->irq,
- 					    "failed to get wake IRQ\n");
-@@ -962,6 +967,7 @@ static const struct acpi_device_id intel_cvs_acpi_match[] = {
- 	{ "INTC10DE" }, /* LNL */
- 	{ "INTC10E0" }, /* ARL */
- 	{ "INTC10E1" }, /* PTL */
-+	{ "INTC10FA" }, /* NVL */
- 	{ }
- };
- MODULE_DEVICE_TABLE(acpi, intel_cvs_acpi_match);
-diff --git a/drivers/media/i2c/cvs/icvs.h b/drivers/media/i2c/cvs/icvs.h
-index cfa8ef5d975c..17beb0920dd2 100644
---- a/drivers/media/i2c/cvs/icvs.h
-+++ b/drivers/media/i2c/cvs/icvs.h
-@@ -432,7 +432,6 @@ enum icvs_state {
-  * @freq_ctrl: (future) frequency control pointer
-  * @pads: Local media pads (sink/source)
-  * @nr_of_lanes: Active CSI-2 lane count
-- * @link_freq: Current link frequency (Hz)
-  * @ipu_link: PM runtime device link (IPU consumer, CVS supplier)
-  * @res: Resource capability (light/full)
-  * @caps: Reported device protocol capabilities
-@@ -458,7 +457,6 @@ struct icvs {
- 	struct v4l2_ctrl *freq_ctrl;
- 	struct media_pad pads[ICVS_CSI_NUM_PADS];
- 	u32 nr_of_lanes;
--	u64 link_freq;
- 	struct device_link *ipu_link;
- 	enum icvs_resources res;
- 	struct icvs_dev_capabilities caps;
-diff --git a/drivers/media/i2c/cvs/v4l2.c b/drivers/media/i2c/cvs/v4l2.c
-index 3a1ec0059ef7..9fadca7a3bee 100644
---- a/drivers/media/i2c/cvs/v4l2.c
-+++ b/drivers/media/i2c/cvs/v4l2.c
-@@ -46,6 +46,7 @@ static const struct v4l2_mbus_framefmt cvs_csi_format_mbus_default = {
- /**
-  * csi_set_link_cfg - Program default CSI-2 link parameters
-  * @ctx: CVS device context
-+ * @link_freq: Link frequency (Hz)
-  *
-  * Populates a HOST_SET_MIPI_CONFIG command using current lane count and
-  * link frequency, then submits it to the device.
-@@ -53,12 +54,12 @@ static const struct v4l2_mbus_framefmt cvs_csi_format_mbus_default = {
-  *
-  * Return: 0 on success or negative errno.
-  */
--static int csi_set_link_cfg(struct icvs *ctx)
-+static int csi_set_link_cfg(struct icvs *ctx, u64 link_freq)
- {
- 	struct icvs_cmd cmd = {
- 		.cmd_id = cpu_to_be16(ICVS_HOST_SET_MIPI_CONFIG),
- 		.param.conf.nr_of_lanes = ctx->nr_of_lanes,
--		.param.conf.link_freq = ctx->link_freq,
-+		.param.conf.link_freq = link_freq,
- 	};
- 	size_t cmd_size = sizeof(cmd.cmd_id) + sizeof(cmd.param.conf);
- 
-@@ -91,7 +92,7 @@ static int cvs_csi_enable_streams(struct v4l2_subdev *sd,
- 	struct v4l2_subdev *remote_sd =
- 			    media_entity_to_v4l2_subdev(ctx->remote->entity);
- 	struct device *dev = cvs_dev(ctx);
--	s64 freq;
-+	s64 link_freq;
- 	int ret;
- 
- 	/* cvs_set_link_owner(ICVS_CSI_LINK_HOST) */
-@@ -99,15 +100,14 @@ static int cvs_csi_enable_streams(struct v4l2_subdev *sd,
- 	if (ret < 0)
- 		return ret;
- 
--	freq = v4l2_get_link_freq(ctx->remote, 0, 0);
--	if (freq < 0) {
--		ret = freq;
-+	link_freq = v4l2_get_link_freq(ctx->remote, 0, 0);
-+	if (link_freq < 0) {
-+		ret = link_freq;
- 		goto err_rpm_put;
- 	}
--	ctx->link_freq = freq;
- 
- 	if (ctx->i2c_client) {
--		ret = csi_set_link_cfg(ctx);
-+		ret = csi_set_link_cfg(ctx, link_freq);
- 		if (ret < 0)
- 			goto err_rpm_put_sync;
- 	}
-@@ -345,7 +345,6 @@ static int cvs_csi_get_mbus_config(struct v4l2_subdev *sd, unsigned int pad,
- 	if (freq < 0)
- 		return -EINVAL;
- 
--	ctx->link_freq = freq;
- 	cfg->link_freq = freq;
- 
- 	return 0;
-diff --git a/drivers/media/i2c/imx471.c b/drivers/media/i2c/imx471.c
-new file mode 100644
-index 000000000000..180a2449851f
---- /dev/null
-+++ b/drivers/media/i2c/imx471.c
-@@ -0,0 +1,957 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * imx471.c - imx471 sensor driver
-+ *
-+ * Copyright (C) 2025 Intel Corporation
-+ * Copyright (C) 2026 Kate Hsuan <hpa@redhat.com>
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/i2c.h>
-+#include <linux/module.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/regulator/consumer.h>
-+#include <media/v4l2-cci.h>
-+#include <media/v4l2-ctrls.h>
-+#include <media/v4l2-subdev.h>
-+#include <media/v4l2-fwnode.h>
-+
-+#define IMX471_REG_MODE_SELECT			CCI_REG8(0x0100)
-+#define IMX471_MODE_STANDBY			0x00
-+#define IMX471_MODE_STREAMING			0x01
-+
-+/* Chip ID */
-+#define IMX471_REG_CHIP_ID			CCI_REG16(0x0016)
-+#define IMX471_CHIP_ID				0x0471
-+
-+/* V_TIMING internal */
-+#define IMX471_REG_FLL				CCI_REG16(0x0340)
-+#define IMX471_FLL_MAX				0xffff
-+
-+/* Exposure control */
-+#define IMX471_REG_EXPOSURE			CCI_REG16(0x0202)
-+#define IMX471_EXPOSURE_MIN			1
-+#define IMX471_EXPOSURE_STEP			1
-+#define IMX471_EXPOSURE_DEFAULT			1270
-+
-+/* Default exposure margin */
-+#define IMX471_EXPOSURE_MARGIN			18
-+
-+/* Analog gain control */
-+#define IMX471_REG_ANALOG_GAIN			CCI_REG16(0x0204)
-+#define IMX471_ANA_GAIN_MIN			0
-+#define IMX471_ANA_GAIN_MAX			960
-+#define IMX471_ANA_GAIN_STEP			1
-+#define IMX471_ANA_GAIN_DEFAULT			0
-+
-+/* Digital gain control */
-+#define IMX471_REG_DPGA_USE_GLOBAL_GAIN		CCI_REG8(0x3ff9)
-+#define IMX471_REG_DIG_GAIN_GLOBAL		CCI_REG16(0x020e)
-+#define IMX471_DGTL_GAIN_MIN			256
-+#define IMX471_DGTL_GAIN_MAX			4095
-+#define IMX471_DGTL_GAIN_STEP			1
-+#define IMX471_DGTL_GAIN_DEFAULT		256
-+
-+/* HFLIP and VFLIP control */
-+#define IMX471_REG_ORIENTATION			CCI_REG8(0x0101)
-+
-+/* Test Pattern Control */
-+#define IMX471_REG_TEST_PATTERN			CCI_REG8(0x0600)
-+
-+/* default link frequency and external clock */
-+#define IMX471_LINK_FREQ_DEFAULT		200000000LL
-+#define IMX471_EXT_CLK				19200000
-+
-+/* PLL */
-+#define IMX471_REG_VTPXCK_DIV			CCI_REG8(0x0301)
-+#define IMX471_REG_VTSYCK_DIV			CCI_REG8(0x0303)
-+#define IMX471_REG_PREPLLCK_VT_DIV		CCI_REG8(0x0305)
-+#define IMX471_REG_PLL_VT_MPY			CCI_REG16(0x0306)
-+#define IMX471_REG_OPPXCK_DIV			CCI_REG8(0x0309)
-+#define IMX471_REG_OPSYCK_DIV			CCI_REG8(0x030b)
-+#define IMX471_REG_PLL_MULT_DRIV		CCI_REG8(0x0310)
-+#define IMX471_PLL_SINGLE			0
-+#define IMX471_PLL_DUAL				1
-+
-+/* IMX471 native and active pixel array size */
-+#define IMX471_NATIVE_WIDTH			4672
-+#define IMX471_NATIVE_HEIGHT			3512
-+#define IMX471_PIXEL_ARRAY_LEFT			8
-+#define IMX471_PIXEL_ARRAY_TOP			8
-+#define IMX471_PIXEL_ARRAY_WIDTH		4656
-+#define IMX471_PIXEL_ARRAY_HEIGHT		3496
-+
-+#define IMX471_REG_EXCK_FREQ			CCI_REG16(0x0136)
-+
-+#define IMX471_REG_CSI_DATA_FORMAT		CCI_REG16(0x0112)
-+#define IMX471_CSI_DATA_FORMAT_RAW10		0x0a0a
-+
-+#define IMX471_REG_CSI_LANE_MODE		CCI_REG8(0x0114)
-+#define IMX471_CSI_2_LANE_MODE			1
-+#define IMX471_CSI_4_LANE_MODE			3
-+
-+#define IMX471_REG_X_ADD_STA			CCI_REG16(0x0344)
-+#define IMX471_REG_Y_ADD_STA			CCI_REG16(0x0346)
-+#define IMX471_REG_X_ADD_END			CCI_REG16(0x0348)
-+#define IMX471_REG_Y_ADD_END			CCI_REG16(0x034a)
-+#define IMX471_REG_X_OUTPUT_SIZE		CCI_REG16(0x034c)
-+#define IMX471_REG_Y_OUTPUT_SIZE		CCI_REG16(0x034e)
-+#define IMX471_REG_X_EVEN_INC			CCI_REG8(0x0381)
-+#define IMX471_REG_X_ODD_INC			CCI_REG8(0x0383)
-+#define IMX471_REG_Y_EVEN_INC			CCI_REG8(0x0385)
-+#define IMX471_REG_Y_ODD_INC			CCI_REG8(0x0387)
-+
-+#define IMX471_REG_DIG_CROP_X_OFFSET		CCI_REG16(0x0408)
-+#define IMX471_REG_DIG_CROP_Y_OFFSET		CCI_REG16(0x040a)
-+#define IMX471_REG_DIG_CROP_WIDTH		CCI_REG16(0x040c)
-+#define IMX471_REG_DIG_CROP_HEIGHT		CCI_REG16(0x040e)
-+
-+/* Binning mode */
-+#define IMX471_REG_BINNING_MODE			CCI_REG8(0x0900)
-+#define IMX471_BINNING_NONE			0
-+#define IMX471_BINNING_ENABLE			1
-+#define IMX471_REG_BINNING_TYPE			CCI_REG8(0x0901)
-+#define IMX471_REG_BINNING_WEIGHTING		CCI_REG8(0x0902)
-+
-+#define to_imx471(_sd) container_of_const(_sd, struct imx471, sd)
-+
-+static const char * const imx471_supply_name[] = {
-+	"vana",
-+};
-+
-+struct imx471_mode {
-+	u32 width;
-+	u32 height;
-+
-+	/* V-timing */
-+	u32 fll_def;
-+	u32 fll_min;
-+
-+	/* H-timing */
-+	u32 llp;
-+
-+	const struct cci_reg_sequence *default_mode_regs;
-+	unsigned int default_mode_regs_length;
-+};
-+
-+struct imx471 {
-+	struct v4l2_subdev sd;
-+	struct media_pad pad;
-+
-+	struct v4l2_ctrl_handler ctrl_handler;
-+	struct v4l2_ctrl *vblank;
-+	struct v4l2_ctrl *hblank;
-+	struct v4l2_ctrl *vflip;
-+	struct v4l2_ctrl *hflip;
-+	struct v4l2_ctrl *exposure;
-+
-+	struct gpio_desc *reset_gpio;
-+	struct regulator_bulk_data supplies[ARRAY_SIZE(imx471_supply_name)];
-+	struct clk *img_clk;
-+
-+	struct device *dev;
-+	struct regmap *regmap;
-+};
-+
-+static const struct cci_reg_sequence imx471_global_regs[] = {
-+	{ IMX471_REG_EXCK_FREQ, 0x1333 },
-+	{ CCI_REG8(0x3c7e), 0x08 },
-+	{ CCI_REG8(0x3c7f), 0x05 },
-+	{ CCI_REG8(0x3e35), 0x00 },
-+	{ CCI_REG8(0x3e36), 0x00 },
-+	{ CCI_REG8(0x3e37), 0x00 },
-+	{ CCI_REG8(0x3f7f), 0x01 },
-+	{ CCI_REG8(0x4431), 0x04 },
-+	{ CCI_REG8(0x531c), 0x01 },
-+	{ CCI_REG8(0x531d), 0x02 },
-+	{ CCI_REG8(0x531e), 0x04 },
-+	{ CCI_REG8(0x5928), 0x00 },
-+	{ CCI_REG8(0x5929), 0x2f },
-+	{ CCI_REG8(0x592a), 0x00 },
-+	{ CCI_REG8(0x592b), 0x85 },
-+	{ CCI_REG8(0x592c), 0x00 },
-+	{ CCI_REG8(0x592d), 0x32 },
-+	{ CCI_REG8(0x592e), 0x00 },
-+	{ CCI_REG8(0x592f), 0x88 },
-+	{ CCI_REG8(0x5930), 0x00 },
-+	{ CCI_REG8(0x5931), 0x3d },
-+	{ CCI_REG8(0x5932), 0x00 },
-+	{ CCI_REG8(0x5933), 0x93 },
-+	{ CCI_REG8(0x5938), 0x00 },
-+	{ CCI_REG8(0x5939), 0x24 },
-+	{ CCI_REG8(0x593a), 0x00 },
-+	{ CCI_REG8(0x593b), 0x7a },
-+	{ CCI_REG8(0x593c), 0x00 },
-+	{ CCI_REG8(0x593d), 0x24 },
-+	{ CCI_REG8(0x593e), 0x00 },
-+	{ CCI_REG8(0x593f), 0x7a },
-+	{ CCI_REG8(0x5940), 0x00 },
-+	{ CCI_REG8(0x5941), 0x2f },
-+	{ CCI_REG8(0x5942), 0x00 },
-+	{ CCI_REG8(0x5943), 0x85 },
-+	{ CCI_REG8(0x5f0e), 0x6e },
-+	{ CCI_REG8(0x5f11), 0xc6 },
-+	{ CCI_REG8(0x5f17), 0x5e },
-+	{ CCI_REG8(0x7990), 0x01 },
-+	{ CCI_REG8(0x7993), 0x5d },
-+	{ CCI_REG8(0x7994), 0x5d },
-+	{ CCI_REG8(0x7995), 0xa1 },
-+	{ CCI_REG8(0x799a), 0x01 },
-+	{ CCI_REG8(0x799d), 0x00 },
-+	{ CCI_REG8(0x8169), 0x01 },
-+	{ CCI_REG8(0x8359), 0x01 },
-+	{ CCI_REG8(0x9302), 0x1e },
-+	{ CCI_REG8(0x9306), 0x1f },
-+	{ CCI_REG8(0x930a), 0x26 },
-+	{ CCI_REG8(0x930e), 0x23 },
-+	{ CCI_REG8(0x9312), 0x23 },
-+	{ CCI_REG8(0x9316), 0x2c },
-+	{ CCI_REG8(0x9317), 0x19 },
-+	{ CCI_REG8(0xb046), 0x01 },
-+	{ CCI_REG8(0xb048), 0x01 },
-+};
-+
-+static const struct cci_reg_sequence mode_1928x1088_regs[] = {
-+	{ IMX471_REG_CSI_DATA_FORMAT, IMX471_CSI_DATA_FORMAT_RAW10 },
-+	{ IMX471_REG_CSI_LANE_MODE, IMX471_CSI_4_LANE_MODE },
-+	{ IMX471_REG_X_ADD_STA, 8 },
-+	{ IMX471_REG_Y_ADD_STA, 408 },
-+	{ IMX471_REG_X_ADD_END, 4647 },
-+	{ IMX471_REG_Y_ADD_END, 3051 },
-+	{ IMX471_REG_X_EVEN_INC, 1 },
-+	{ IMX471_REG_X_ODD_INC, 1 },
-+	{ IMX471_REG_Y_EVEN_INC, 1 },
-+	{ IMX471_REG_Y_ODD_INC, 1 },
-+	{ IMX471_REG_BINNING_MODE, IMX471_BINNING_ENABLE },
-+	{ IMX471_REG_BINNING_TYPE, 0x22 },
-+	{ IMX471_REG_BINNING_WEIGHTING, 0x08 },
-+	{ IMX471_REG_DIG_CROP_X_OFFSET, 208 },
-+	{ IMX471_REG_DIG_CROP_Y_OFFSET, 108 },
-+	{ IMX471_REG_DIG_CROP_WIDTH, 1928 },
-+	{ IMX471_REG_DIG_CROP_HEIGHT, 1088 },
-+	{ IMX471_REG_X_OUTPUT_SIZE, 1928 },
-+	{ IMX471_REG_Y_OUTPUT_SIZE, 1088 },
-+	{ IMX471_REG_VTPXCK_DIV, 0x06 },
-+	{ IMX471_REG_VTSYCK_DIV, 0x02 },
-+	{ IMX471_REG_PREPLLCK_VT_DIV, 0x02 },
-+	{ IMX471_REG_PLL_VT_MPY, 0x0079 },
-+	{ IMX471_REG_OPSYCK_DIV, 0x01 },
-+	{ CCI_REG8(0x030d), 0x02 },
-+	{ CCI_REG8(0x030e), 0x00 },
-+	{ CCI_REG8(0x030f), 0x53 },
-+	{ IMX471_REG_PLL_MULT_DRIV, IMX471_PLL_DUAL },
-+	{ CCI_REG8(0x3f4c), 0x81 },
-+	{ CCI_REG8(0x3f4d), 0x81 },
-+	{ CCI_REG8(0x3f78), 0x01 },
-+	{ CCI_REG8(0x3f79), 0x31 },
-+	{ CCI_REG8(0x3ffe), 0x00 },
-+	{ CCI_REG8(0x3fff), 0x8a },
-+	{ CCI_REG8(0x5f0a), 0xb6 },
-+};
-+
-+static const char * const imx471_test_pattern_menu[] = {
-+	"Disabled",
-+	"Solid Colour",
-+	"Eight Vertical Colour Bars",
-+	"Colour Bars With Fade to Grey",
-+	"Pseudorandom Sequence (PN9)",
-+};
-+
-+static const s64 link_freq_menu_items[] = {
-+	IMX471_LINK_FREQ_DEFAULT,
-+};
-+
-+/*
-+ * The Bayer formats for the flipping.
-+ * - no flip
-+ * - h flip
-+ * - v flip
-+ * - h and v flips
-+ */
-+static const u32 imx471_hv_flips_bayer_order[] = {
-+	MEDIA_BUS_FMT_SRGGB10_1X10,
-+	MEDIA_BUS_FMT_SGRBG10_1X10,
-+	MEDIA_BUS_FMT_SGBRG10_1X10,
-+	MEDIA_BUS_FMT_SBGGR10_1X10,
-+};
-+
-+static const struct imx471_mode imx471_modes[] = {
-+	{
-+		.width = 1928,
-+		.height = 1088,
-+		.fll_def = 1308,
-+		.fll_min = 1308,
-+		.llp = 2328,
-+		.default_mode_regs = mode_1928x1088_regs,
-+		.default_mode_regs_length = ARRAY_SIZE(mode_1928x1088_regs),
-+	},
-+};
-+
-+static int imx471_get_regulators(struct device *dev, struct imx471 *sensor)
-+{
-+	for (unsigned int i = 0; i < ARRAY_SIZE(imx471_supply_name); i++)
-+		sensor->supplies[i].supply = imx471_supply_name[i];
-+
-+	return devm_regulator_bulk_get(dev, ARRAY_SIZE(imx471_supply_name),
-+				       sensor->supplies);
-+}
-+
-+static int imx471_set_ctrl(struct v4l2_ctrl *ctrl)
-+{
-+	struct imx471 *sensor = container_of_const(ctrl->handler,
-+						   struct imx471,
-+						   ctrl_handler);
-+	struct v4l2_subdev_state *state =
-+			v4l2_subdev_get_locked_active_state(&sensor->sd);
-+	const struct v4l2_mbus_framefmt *format =
-+			v4l2_subdev_state_get_format(state, 0);
-+	int ret;
-+
-+	if (ctrl->id == V4L2_CID_VBLANK) {
-+		s64 exposure_max = format->height + ctrl->val -
-+				   IMX471_EXPOSURE_MARGIN;
-+		ret = __v4l2_ctrl_modify_range(sensor->exposure,
-+					       sensor->exposure->minimum,
-+					       exposure_max,
-+					       sensor->exposure->step,
-+					       exposure_max);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	if (!pm_runtime_get_if_in_use(sensor->dev))
-+		return 0;
-+
-+	switch (ctrl->id) {
-+	case V4L2_CID_ANALOGUE_GAIN:
-+		ret = cci_write(sensor->regmap, IMX471_REG_ANALOG_GAIN,
-+				ctrl->val, NULL);
-+		break;
-+	case V4L2_CID_DIGITAL_GAIN:
-+		ret = cci_write(sensor->regmap, IMX471_REG_DIG_GAIN_GLOBAL,
-+				ctrl->val, NULL);
-+		break;
-+	case V4L2_CID_EXPOSURE:
-+		ret = cci_write(sensor->regmap, IMX471_REG_EXPOSURE,
-+				ctrl->val, NULL);
-+		break;
-+	case V4L2_CID_VBLANK:
-+		/* Update FLL that meets expected vertical blanking */
-+		ret = cci_write(sensor->regmap, IMX471_REG_FLL,
-+				format->height + ctrl->val, NULL);
-+		break;
-+	case V4L2_CID_TEST_PATTERN:
-+		ret = cci_write(sensor->regmap, IMX471_REG_TEST_PATTERN,
-+				ctrl->val, NULL);
-+		break;
-+	case V4L2_CID_HFLIP:
-+	case V4L2_CID_VFLIP:
-+		ret = cci_write(sensor->regmap, IMX471_REG_ORIENTATION,
-+				sensor->hflip->val | sensor->vflip->val << 1,
-+				NULL);
-+		break;
-+	default:
-+		ret = -EINVAL;
-+		dev_err(sensor->dev, "ctrl(id:0x%x,val:0x%x) is not handled\n",
-+			ctrl->id, ctrl->val);
-+		break;
-+	}
-+
-+	pm_runtime_put(sensor->dev);
-+
-+	return ret;
-+}
-+
-+static const struct v4l2_ctrl_ops imx471_ctrl_ops = {
-+	.s_ctrl = imx471_set_ctrl,
-+};
-+
-+static u32 imx471_get_format_code(struct imx471 *sensor)
-+{
-+	unsigned int i;
-+
-+	i = (sensor->vflip->val ? 2 : 0) | (sensor->hflip->val ? 1 : 0);
-+
-+	return imx471_hv_flips_bayer_order[i];
-+}
-+
-+static int imx471_enum_mbus_code(struct v4l2_subdev *sd,
-+				 struct v4l2_subdev_state *sd_state,
-+				 struct v4l2_subdev_mbus_code_enum *code)
-+{
-+	struct imx471 *sensor = to_imx471(sd);
-+
-+	if (code->index >= (ARRAY_SIZE(imx471_hv_flips_bayer_order) / 4))
-+		return -EINVAL;
-+
-+	code->code = imx471_get_format_code(sensor);
-+
-+	return 0;
-+}
-+
-+static int imx471_enum_frame_size(struct v4l2_subdev *sd,
-+				  struct v4l2_subdev_state *sd_state,
-+				  struct v4l2_subdev_frame_size_enum *fse)
-+{
-+	if (fse->index >= ARRAY_SIZE(imx471_modes))
-+		return -EINVAL;
-+
-+	fse->min_width = imx471_modes[fse->index].width;
-+	fse->max_width = fse->min_width;
-+	fse->min_height = imx471_modes[fse->index].height;
-+	fse->max_height = fse->min_height;
-+
-+	return 0;
-+}
-+
-+static void imx471_update_pad_format(struct imx471 *sensor,
-+				     const struct imx471_mode *mode,
-+				     struct v4l2_subdev_format *fmt)
-+{
-+	fmt->format.code = imx471_get_format_code(sensor);
-+	fmt->format.width = mode->width;
-+	fmt->format.height = mode->height;
-+	fmt->format.field = V4L2_FIELD_NONE;
-+}
-+
-+static int imx471_set_pad_format(struct v4l2_subdev *sd,
-+				 struct v4l2_subdev_state *sd_state,
-+				 struct v4l2_subdev_format *fmt)
-+{
-+	struct imx471 *sensor = to_imx471(sd);
-+	const struct imx471_mode *mode;
-+	int h_blank, ret;
-+
-+	mode = v4l2_find_nearest_size(imx471_modes, ARRAY_SIZE(imx471_modes),
-+				      width, height, fmt->format.width,
-+				      fmt->format.height);
-+
-+	imx471_update_pad_format(sensor, mode, fmt);
-+
-+	*v4l2_subdev_state_get_format(sd_state, fmt->pad) = fmt->format;
-+
-+	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-+		return 0;
-+
-+	if (media_entity_is_streaming(&sensor->sd.entity))
-+		return -EBUSY;
-+
-+	ret = __v4l2_ctrl_modify_range(sensor->vblank,
-+				       mode->fll_min - mode->height,
-+				       IMX471_FLL_MAX - mode->height,
-+				       1,
-+				       mode->fll_def - mode->height);
-+	if (ret)
-+		return ret;
-+
-+	h_blank = mode->llp - mode->width;
-+	/*
-+	 * Currently hblank is not changeable.
-+	 * So FPS control is done only by vblank.
-+	 */
-+	return __v4l2_ctrl_modify_range(sensor->hblank, h_blank,
-+					h_blank, 1, h_blank);
-+}
-+
-+static int imx471_get_selection(struct v4l2_subdev *sd,
-+				struct v4l2_subdev_state *sd_state,
-+				struct v4l2_subdev_selection *sel)
-+{
-+	switch (sel->target) {
-+	case V4L2_SEL_TGT_CROP:
-+		sel->r = *v4l2_subdev_state_get_crop(sd_state, sel->pad);
-+		break;
-+
-+	case V4L2_SEL_TGT_NATIVE_SIZE:
-+		sel->r.top = 0;
-+		sel->r.left = 0;
-+		sel->r.width = IMX471_NATIVE_WIDTH;
-+		sel->r.height = IMX471_NATIVE_HEIGHT;
-+		return 0;
-+
-+	case V4L2_SEL_TGT_CROP_DEFAULT:
-+	case V4L2_SEL_TGT_CROP_BOUNDS:
-+		sel->r.top = IMX471_PIXEL_ARRAY_TOP;
-+		sel->r.left = IMX471_PIXEL_ARRAY_LEFT;
-+		sel->r.width = IMX471_PIXEL_ARRAY_WIDTH;
-+		sel->r.height = IMX471_PIXEL_ARRAY_HEIGHT;
-+		return 0;
-+	}
-+
-+	return -EINVAL;
-+}
-+
-+static int imx471_init_state(struct v4l2_subdev *sd,
-+			     struct v4l2_subdev_state *sd_state)
-+{
-+	struct v4l2_subdev_format fmt = {
-+		.which = V4L2_SUBDEV_FORMAT_TRY,
-+		.format = {
-+			.code = MEDIA_BUS_FMT_SRGGB10_1X10,
-+			.width = imx471_modes[0].width,
-+			.height = imx471_modes[0].height,
-+		},
-+	};
-+
-+	return imx471_set_pad_format(sd, sd_state, &fmt);
-+}
-+
-+static int imx471_identify_module(struct imx471 *sensor)
-+{
-+	int ret;
-+	u64 val;
-+
-+	ret = cci_read(sensor->regmap, IMX471_REG_CHIP_ID, &val, NULL);
-+	if (ret)
-+		return dev_err_probe(sensor->dev, ret,
-+				     "failed to read chip id\n");
-+
-+	if (val != IMX471_CHIP_ID)
-+		return dev_err_probe(sensor->dev, -EIO,
-+				     "chip id mismatch: %x!=%llx\n",
-+				     IMX471_CHIP_ID, val);
-+
-+	return 0;
-+}
-+
-+static int imx471_power_off(struct device *dev)
-+{
-+	struct v4l2_subdev *sd = dev_get_drvdata(dev);
-+	struct imx471 *sensor = to_imx471(sd);
-+
-+	clk_disable_unprepare(sensor->img_clk);
-+	gpiod_set_value_cansleep(sensor->reset_gpio, 1);
-+
-+	regulator_bulk_disable(ARRAY_SIZE(imx471_supply_name),
-+			       sensor->supplies);
-+
-+	return 0;
-+}
-+
-+static int imx471_power_on(struct device *dev)
-+{
-+	struct v4l2_subdev *sd = dev_get_drvdata(dev);
-+	struct imx471 *sensor = to_imx471(sd);
-+	int ret;
-+
-+	ret = regulator_bulk_enable(ARRAY_SIZE(imx471_supply_name),
-+				    sensor->supplies);
-+	if (ret < 0) {
-+		dev_err(dev, "failed to enable regulators: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = clk_prepare_enable(sensor->img_clk);
-+	if (ret < 0) {
-+		regulator_bulk_disable(ARRAY_SIZE(imx471_supply_name),
-+				       sensor->supplies);
-+		dev_err(dev, "failed to enable imaging clock: %d\n", ret);
-+		return ret;
-+	}
-+
-+	gpiod_set_value_cansleep(sensor->reset_gpio, 0);
-+
-+	usleep_range(10000, 15000);
-+
-+	return 0;
-+}
-+
-+static int imx471_enable_stream(struct v4l2_subdev *sd,
-+				struct v4l2_subdev_state *state,
-+				u32 pad, u64 streams_mask)
-+{
-+	struct imx471 *sensor = to_imx471(sd);
-+	const struct imx471_mode *mode;
-+	struct v4l2_mbus_framefmt *fmt;
-+	int ret;
-+
-+	ret = pm_runtime_resume_and_get(sensor->dev);
-+	if (ret)
-+		return ret;
-+
-+	ret = imx471_identify_module(sensor);
-+	if (ret)
-+		goto error_powerdown;
-+
-+	ret = cci_multi_reg_write(sensor->regmap, imx471_global_regs,
-+				  ARRAY_SIZE(imx471_global_regs), NULL);
-+	if (ret) {
-+		dev_err(sensor->dev, "failed to set global settings: %d\n",
-+			ret);
-+		goto error_powerdown;
-+	}
-+
-+	fmt = v4l2_subdev_state_get_format(state, 0);
-+	mode = v4l2_find_nearest_size(imx471_modes, ARRAY_SIZE(imx471_modes),
-+				      width, height, fmt->width, fmt->height);
-+
-+	ret = cci_multi_reg_write(sensor->regmap, mode->default_mode_regs,
-+				  mode->default_mode_regs_length, NULL);
-+	if (ret) {
-+		dev_err(sensor->dev, "failed to set mode: %d\n", ret);
-+		goto error_powerdown;
-+	}
-+
-+	ret = cci_write(sensor->regmap, IMX471_REG_DPGA_USE_GLOBAL_GAIN, 1,
-+			NULL);
-+	if (ret)
-+		goto error_powerdown;
-+
-+	ret = __v4l2_ctrl_handler_setup(&sensor->ctrl_handler);
-+	if (ret)
-+		goto error_powerdown;
-+
-+	ret = cci_write(sensor->regmap, IMX471_REG_MODE_SELECT,
-+			IMX471_MODE_STREAMING, NULL);
-+	if (ret)
-+		goto error_powerdown;
-+
-+	__v4l2_ctrl_grab(sensor->vflip, true);
-+	__v4l2_ctrl_grab(sensor->hflip, true);
-+
-+	return ret;
-+
-+error_powerdown:
-+	pm_runtime_put(sensor->dev);
-+
-+	return ret;
-+}
-+
-+static int imx471_disable_stream(struct v4l2_subdev *sd,
-+				 struct v4l2_subdev_state *state,
-+				 u32 pad, u64 streams_mask)
-+{
-+	struct imx471 *sensor = to_imx471(sd);
-+	int ret;
-+
-+	ret = cci_write(sensor->regmap, IMX471_REG_MODE_SELECT,
-+			IMX471_MODE_STANDBY, NULL);
-+	pm_runtime_put(sensor->dev);
-+
-+	if (ret)
-+		dev_err(sensor->dev,
-+			"failed to disable stream with return value: %d\n",
-+			ret);
-+
-+	__v4l2_ctrl_grab(sensor->vflip, false);
-+	__v4l2_ctrl_grab(sensor->hflip, false);
-+
-+	return 0;
-+}
-+
-+static const struct v4l2_subdev_video_ops imx471_video_ops = {
-+	.s_stream = v4l2_subdev_s_stream_helper,
-+};
-+
-+static const struct v4l2_subdev_pad_ops imx471_pad_ops = {
-+	.enum_mbus_code = imx471_enum_mbus_code,
-+	.get_fmt = v4l2_subdev_get_fmt,
-+	.set_fmt = imx471_set_pad_format,
-+	.get_selection = imx471_get_selection,
-+	.enum_frame_size = imx471_enum_frame_size,
-+	.enable_streams = imx471_enable_stream,
-+	.disable_streams = imx471_disable_stream,
-+};
-+
-+static const struct v4l2_subdev_ops imx471_subdev_ops = {
-+	.video = &imx471_video_ops,
-+	.pad = &imx471_pad_ops,
-+};
-+
-+static const struct v4l2_subdev_internal_ops imx471_internal_ops = {
-+	.init_state = imx471_init_state,
-+};
-+
-+static int imx471_init_controls(struct imx471 *sensor)
-+{
-+	const struct imx471_mode *mode = &imx471_modes[0];
-+	struct v4l2_fwnode_device_properties props;
-+	struct v4l2_ctrl_handler *ctrl_hdlr;
-+	struct v4l2_ctrl *link_freq;
-+	s64 exposure_max, hblank;
-+	u64 pixel_rate;
-+	int ret;
-+
-+	ret = v4l2_fwnode_device_parse(sensor->dev, &props);
-+	if (ret) {
-+		dev_err(sensor->dev, "failed to parse fwnode: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ctrl_hdlr = &sensor->ctrl_handler;
-+	v4l2_ctrl_handler_init(ctrl_hdlr, 12);
-+
-+	v4l2_ctrl_new_fwnode_properties(ctrl_hdlr, &imx471_ctrl_ops, &props);
-+
-+	link_freq = v4l2_ctrl_new_int_menu(ctrl_hdlr,
-+					   &imx471_ctrl_ops,
-+					   V4L2_CID_LINK_FREQ,
-+					   ARRAY_SIZE(link_freq_menu_items) - 1,
-+					   0,
-+					   link_freq_menu_items);
-+
-+	/* pixel_rate = link_freq * 2 * nr_of_lanes / bits_per_sample */
-+	pixel_rate = div_u64(IMX471_LINK_FREQ_DEFAULT * 2 * 4, 10);
-+
-+	v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops,
-+			  V4L2_CID_PIXEL_RATE, pixel_rate,
-+			  pixel_rate, 1, pixel_rate);
-+
-+	sensor->vblank = v4l2_ctrl_new_std(ctrl_hdlr,
-+					   &imx471_ctrl_ops,
-+					   V4L2_CID_VBLANK,
-+					   mode->fll_min - mode->height,
-+					   IMX471_FLL_MAX - mode->height,
-+					   1,
-+					   mode->fll_def - mode->height);
-+
-+	hblank = mode->llp - mode->width;
-+	sensor->hblank = v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops,
-+					   V4L2_CID_HBLANK, hblank, hblank,
-+					   1, hblank);
-+
-+	/* fll >= exposure time + adjust parameter (default value is 18) */
-+	exposure_max = mode->fll_def - IMX471_EXPOSURE_MARGIN;
-+	sensor->exposure = v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops,
-+					     V4L2_CID_EXPOSURE,
-+					     IMX471_EXPOSURE_MIN, exposure_max,
-+					     IMX471_EXPOSURE_STEP,
-+					     IMX471_EXPOSURE_DEFAULT);
-+
-+	v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops, V4L2_CID_ANALOGUE_GAIN,
-+			  IMX471_ANA_GAIN_MIN, IMX471_ANA_GAIN_MAX,
-+			  IMX471_ANA_GAIN_STEP, IMX471_ANA_GAIN_DEFAULT);
-+
-+	v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops, V4L2_CID_DIGITAL_GAIN,
-+			  IMX471_DGTL_GAIN_MIN, IMX471_DGTL_GAIN_MAX,
-+			  IMX471_DGTL_GAIN_STEP, IMX471_DGTL_GAIN_DEFAULT);
-+
-+	v4l2_ctrl_new_std_menu_items(ctrl_hdlr, &imx471_ctrl_ops,
-+				     V4L2_CID_TEST_PATTERN,
-+				     ARRAY_SIZE(imx471_test_pattern_menu) - 1,
-+				     0, 0, imx471_test_pattern_menu);
-+
-+	sensor->hflip = v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops,
-+					  V4L2_CID_HFLIP, 0, 1, 1, 0);
-+
-+	sensor->vflip = v4l2_ctrl_new_std(ctrl_hdlr, &imx471_ctrl_ops,
-+					  V4L2_CID_VFLIP, 0, 1, 1, 0);
-+
-+	if (ctrl_hdlr->error) {
-+		dev_err(sensor->dev, "%s control init failed: %d\n",
-+			__func__, ctrl_hdlr->error);
-+		goto error;
-+	}
-+
-+	link_freq->flags |= V4L2_CTRL_FLAG_READ_ONLY;
-+	sensor->hblank->flags |= V4L2_CTRL_FLAG_READ_ONLY;
-+	sensor->hflip->flags |= V4L2_CTRL_FLAG_MODIFY_LAYOUT;
-+	sensor->vflip->flags |= V4L2_CTRL_FLAG_MODIFY_LAYOUT;
-+
-+	sensor->sd.ctrl_handler = ctrl_hdlr;
-+
-+	return 0;
-+
-+error:
-+	v4l2_ctrl_handler_free(ctrl_hdlr);
-+
-+	return ctrl_hdlr->error;
-+}
-+
-+static int imx471_check_hwcfg(struct imx471 *sensor)
-+{
-+	struct v4l2_fwnode_endpoint bus_cfg = {
-+		.bus_type = V4L2_MBUS_CSI2_DPHY,
-+	};
-+	struct fwnode_handle *ep, *fwnode = dev_fwnode(sensor->dev);
-+	unsigned long link_freq_bitmap;
-+	struct clk *clk;
-+	int ret;
-+
-+	clk = devm_v4l2_sensor_clk_get(sensor->dev, NULL);
-+	if (IS_ERR(clk))
-+		return dev_err_probe(sensor->dev, PTR_ERR(clk),
-+				     "can't get clock frequency\n");
-+
-+	if (clk_get_rate(clk) != IMX471_EXT_CLK)
-+		return dev_err_probe(sensor->dev, -EINVAL,
-+				     "external clock %lu is not supported\n",
-+				     clk_get_rate(clk));
-+
-+	ep = fwnode_graph_get_endpoint_by_id(fwnode, 0, 0, 0);
-+	ret = v4l2_fwnode_endpoint_alloc_parse(ep, &bus_cfg);
-+	fwnode_handle_put(ep);
-+	if (ret)
-+		return dev_err_probe(sensor->dev, ret,
-+				     "parsing endpoint failed\n");
-+
-+	if (bus_cfg.bus.mipi_csi2.num_data_lanes != 4) {
-+		ret = dev_err_probe(sensor->dev, -EINVAL,
-+				    "number of CSI2 data lanes %u is not supported\n",
-+				    bus_cfg.bus.mipi_csi2.num_data_lanes);
-+		goto done_endpoint_free;
-+	}
-+
-+	ret = v4l2_link_freq_to_bitmap(sensor->dev, bus_cfg.link_frequencies,
-+				       bus_cfg.nr_of_link_frequencies,
-+				       link_freq_menu_items,
-+				       ARRAY_SIZE(link_freq_menu_items),
-+				       &link_freq_bitmap);
-+
-+done_endpoint_free:
-+	v4l2_fwnode_endpoint_free(&bus_cfg);
-+
-+	return ret;
-+}
-+
-+static int imx471_probe(struct i2c_client *client)
-+{
-+	struct imx471 *sensor;
-+	int ret;
-+
-+	sensor = devm_kzalloc(&client->dev, sizeof(*sensor), GFP_KERNEL);
-+	if (!sensor)
-+		return dev_err_probe(&client->dev, -ENOMEM,
-+				     "failed to allocate memory\n");
-+
-+	sensor->dev = &client->dev;
-+
-+	ret = imx471_check_hwcfg(sensor);
-+	if (ret)
-+		return dev_err_probe(sensor->dev, ret,
-+				     "failed to check hwcfg: %d\n", ret);
-+
-+	ret = imx471_get_regulators(sensor->dev, sensor);
-+	if (ret)
-+		return dev_err_probe(sensor->dev, ret,
-+				     "failed to get regulators\n");
-+
-+	sensor->reset_gpio = devm_gpiod_get_optional(sensor->dev, "reset",
-+						     GPIOD_OUT_HIGH);
-+	if (IS_ERR(sensor->reset_gpio))
-+		return dev_err_probe(sensor->dev, PTR_ERR(sensor->reset_gpio),
-+				     "failed to get reset gpio\n");
-+
-+	sensor->img_clk = devm_v4l2_sensor_clk_get(sensor->dev, NULL);
-+	if (IS_ERR(sensor->img_clk))
-+		return dev_err_probe(sensor->dev, PTR_ERR(sensor->img_clk),
-+				     "failed to get imaging clock\n");
-+
-+	v4l2_i2c_subdev_init(&sensor->sd, client, &imx471_subdev_ops);
-+
-+	sensor->regmap = devm_cci_regmap_init_i2c(client, 16);
-+	if (IS_ERR(sensor->regmap))
-+		return dev_err_probe(sensor->dev, PTR_ERR(sensor->regmap),
-+				     "failed to initialize CCI\n");
-+
-+	ret = imx471_power_on(sensor->dev);
-+	if (ret)
-+		return dev_err_probe(sensor->dev, ret,
-+				     "failed to power on\n");
-+
-+	ret = imx471_identify_module(sensor);
-+	if (ret) {
-+		dev_err_probe(sensor->dev, ret, "failed to find sensor: %d\n",
-+			      ret);
-+		goto error_power_off;
-+	}
-+
-+	ret = imx471_init_controls(sensor);
-+	if (ret) {
-+		dev_err_probe(sensor->dev, ret, "failed to init controls: %d\n",
-+			      ret);
-+		goto error_power_off;
-+	}
-+
-+	sensor->sd.internal_ops = &imx471_internal_ops;
-+	sensor->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-+	sensor->pad.flags = MEDIA_PAD_FL_SOURCE;
-+	sensor->sd.entity.function = MEDIA_ENT_F_CAM_SENSOR;
-+
-+	ret = media_entity_pads_init(&sensor->sd.entity, 1, &sensor->pad);
-+	if (ret) {
-+		dev_err_probe(sensor->dev, ret,
-+			      "failed to init entity pads: %d\n", ret);
-+		goto error_v4l2_ctrl_handler_free;
-+	}
-+
-+	sensor->sd.state_lock = sensor->ctrl_handler.lock;
-+	ret = v4l2_subdev_init_finalize(&sensor->sd);
-+	if (ret < 0) {
-+		dev_err_probe(sensor->dev, ret, "failed to init subdev: %d\n",
-+			      ret);
-+		goto error_media_entity_pm;
-+	}
-+
-+	pm_runtime_set_active(sensor->dev);
-+	pm_runtime_enable(sensor->dev);
-+
-+	ret = v4l2_async_register_subdev_sensor(&sensor->sd);
-+	if (ret < 0)
-+		goto error_v4l2_subdev_cleanup;
-+
-+	pm_runtime_idle(sensor->dev);
-+
-+	return 0;
-+
-+error_v4l2_subdev_cleanup:
-+	pm_runtime_disable(sensor->dev);
-+	pm_runtime_set_suspended(sensor->dev);
-+	v4l2_subdev_cleanup(&sensor->sd);
-+
-+error_media_entity_pm:
-+	media_entity_cleanup(&sensor->sd.entity);
-+
-+error_v4l2_ctrl_handler_free:
-+	v4l2_ctrl_handler_free(sensor->sd.ctrl_handler);
-+
-+error_power_off:
-+	imx471_power_off(sensor->dev);
-+
-+	return ret;
-+}
-+
-+static void imx471_remove(struct i2c_client *client)
-+{
-+	struct v4l2_subdev *sd = i2c_get_clientdata(client);
-+
-+	v4l2_async_unregister_subdev(sd);
-+	v4l2_subdev_cleanup(sd);
-+	media_entity_cleanup(&sd->entity);
-+	v4l2_ctrl_handler_free(sd->ctrl_handler);
-+
-+	pm_runtime_disable(&client->dev);
-+
-+	if (!pm_runtime_status_suspended(&client->dev)) {
-+		imx471_power_off(&client->dev);
-+		pm_runtime_set_suspended(&client->dev);
-+	}
-+}
-+
-+static DEFINE_RUNTIME_DEV_PM_OPS(imx471_pm_ops, imx471_power_off,
-+				 imx471_power_on, NULL);
-+
-+static const struct acpi_device_id imx471_acpi_ids[] __maybe_unused = {
-+	{ "SONY471A" },
-+	{ "TBE20A0" },
-+	{ /* sentinel */ }
-+};
-+MODULE_DEVICE_TABLE(acpi, imx471_acpi_ids);
-+
-+static struct i2c_driver imx471_i2c_driver = {
-+	.driver = {
-+		.name = "imx471",
-+		.acpi_match_table = ACPI_PTR(imx471_acpi_ids),
-+		.pm = pm_sleep_ptr(&imx471_pm_ops),
-+	},
-+	.probe = imx471_probe,
-+	.remove = imx471_remove,
-+};
-+module_i2c_driver(imx471_i2c_driver);
-+
-+MODULE_AUTHOR("Jimmy Su <jimmy.su@intel.com>");
-+MODULE_AUTHOR("Serin Yeh <serin.yeh@intel.com>");
-+MODULE_AUTHOR("Kate Hsuan <hpa@redhat.com>");
-+MODULE_DESCRIPTION("Sony imx471 sensor driver");
-+MODULE_LICENSE("GPL");
-diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index 510c0eca4484..5473dd598d5b 100644
---- a/drivers/media/pci/intel/ipu-bridge.c
-+++ b/drivers/media/pci/intel/ipu-bridge.c
-@@ -97,6 +97,8 @@ static const struct ipu_sensor_config ipu_supported_sensors[] = {
- 	IPU_SENSOR_CONFIG("OVTI8856", 3, 180000000, 360000000, 720000000),
- 	/* Sony IMX471 */
- 	IPU_SENSOR_CONFIG("SONY471A", 1, 200000000),
-+	/* Sony IMX471 (found on Lenovo X1 Carbon G14) */
-+	IPU_SENSOR_CONFIG("TBE20A0", 1, 200000000),
- 	/* Toshiba T4KA3 */
- 	IPU_SENSOR_CONFIG("XMCC0003", 1, 321468000),
- };
-@@ -127,6 +129,13 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
- 		},
- 		.driver_data = "OVTI02C1",
- 	},
-+	{
-+		.matches = {
-+			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "XPS 14 (Dell 14 Premium) DA14250"),
-+		},
-+		.driver_data = "OVTI02C1",
-+	},
- 	{
- 		.matches = {
- 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
-@@ -134,6 +143,45 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
- 		},
- 		.driver_data = "OVTI02C1",
- 	},
-+	/*
-+	 * The first four characters of DMI_BOARD_NAME identify the Lenovo
-+	 * machine type/model. For example, a DMI_BOARD_NAME starting with
-+	 * "21Q6" indicates a ThinkPad X9-15.
-+	 *
-+	 * Reference: https://psref.lenovo.com/
-+	 */
-+	{
-+		/* Lenovo X9-14 */
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-+			DMI_MATCH(DMI_BOARD_NAME, "21QA"),
-+		},
-+		.driver_data = "SONY471A",
-+	},
-+	{
-+		/* Lenovo X9-14 */
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-+			DMI_MATCH(DMI_BOARD_NAME, "21QB"),
-+		},
-+		.driver_data = "SONY471A",
-+	},
-+	{
-+		/* Lenovo X9-15 */
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-+			DMI_MATCH(DMI_BOARD_NAME, "21Q6"),
-+		},
-+		.driver_data = "SONY471A",
-+	},
-+	{
-+		/* Lenovo X9-15 */
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-+			DMI_MATCH(DMI_BOARD_NAME, "21Q7"),
-+		},
-+		.driver_data = "SONY471A",
-+	},
- 	{} /* Terminating entry */
- };
- 
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 0500d5fd4f11..b13589a0860e 100644
+index 1aa87a3ef9ed..59ed9c2bf2d4 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4499,6 +4499,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
+@@ -4510,6 +4510,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
  }
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ASPEED, 0x1150, quirk_aspeed_pci_bridge_no_alias);
  
@@ -4685,260 +3058,8 @@ index 0500d5fd4f11..b13589a0860e 100644
  /*
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
-diff --git a/drivers/platform/x86/intel/int3472/discrete.c b/drivers/platform/x86/intel/int3472/discrete.c
-index 115bb37577a1..749e2e323583 100644
---- a/drivers/platform/x86/intel/int3472/discrete.c
-+++ b/drivers/platform/x86/intel/int3472/discrete.c
-@@ -15,6 +15,7 @@
- #include <linux/platform_data/x86/int3472.h>
- #include <linux/platform_device.h>
- #include <linux/string_choices.h>
-+#include <linux/time64.h>
- #include <linux/uuid.h>
- 
- /*
-@@ -123,10 +124,31 @@ skl_int3472_gpiod_get_from_temp_lookup(struct int3472_discrete_device *int3472,
- 	return desc;
- }
- 
-+/*
-+ * Other vana-supply users (e.g. ST, Toshiba, Sony sensors) can be added to
-+ * this array instead of adding new quirk table entries.
-+ */
-+static const char * const power_enable_hids_vana[] = {
-+	"SONY471A", /* imx471 on Lenovo X9-14 and X9-15 */
-+	"TBE20A0", /* imx471 on Lenovo X1 Carbon G14 */
-+	NULL
-+};
-+
-+static const char * const power_enable_hids_vdd[] = {
-+	"INT33F0", /* mt9m114 */
-+	NULL
-+};
-+
-+static const char * const power_enable_hids_enable[] = {
-+	"INT347E", /* ov7251 */
-+	NULL
-+};
-+
- /**
-  * struct int3472_gpio_map - Map GPIOs to whatever is expected by the
-  * sensor driver (as in DT bindings)
-- * @hid: The ACPI HID of the device without the instance number e.g. INT347E
-+ * @hids: NULL-terminated array of ACPI HIDs of the devices without the
-+ * instance number e.g. INT347E
-  * @type_from: The GPIO type from ACPI ?SDT
-  * @type_to: The assigned GPIO type, typically same as @type_from
-  * @enable_time_us: Enable time in usec for GPIOs mapped to regulators
-@@ -135,7 +157,7 @@ skl_int3472_gpiod_get_from_temp_lookup(struct int3472_discrete_device *int3472,
-  * GPIO_ACTIVE_HIGH otherwise
-  */
- struct int3472_gpio_map {
--	const char *hid;
-+	const char * const *hids;
- 	u8 type_from;
- 	u8 type_to;
- 	bool polarity_low;
-@@ -145,27 +167,38 @@ struct int3472_gpio_map {
- 
- static const struct int3472_gpio_map int3472_gpio_map[] = {
- 	{	/* mt9m114 designs declare a powerdown pin which controls the regulators */
--		.hid = "INT33F0",
-+		.hids = power_enable_hids_vdd,
- 		.type_from = INT3472_GPIO_TYPE_POWERDOWN,
- 		.type_to = INT3472_GPIO_TYPE_POWER_ENABLE,
- 		.con_id = "vdd",
- 		.enable_time_us = GPIO_REGULATOR_ENABLE_TIME,
- 	},
- 	{	/* ov7251 driver / DT-bindings expect "enable" as con_id for reset */
--		.hid = "INT347E",
-+		.hids = power_enable_hids_enable,
- 		.type_from = INT3472_GPIO_TYPE_RESET,
- 		.type_to = INT3472_GPIO_TYPE_RESET,
- 		.con_id = "enable",
- 	},
--	{	/* ov08x40's handshake pin needs a 45 ms delay on some HP laptops */
--		.hid = "OVTI08F4",
--		.type_from = INT3472_GPIO_TYPE_HANDSHAKE,
--		.type_to = INT3472_GPIO_TYPE_HANDSHAKE,
--		.con_id = "dvdd",
--		.enable_time_us = 45 * USEC_PER_MSEC,
-+	{	/* Sensors which expect "vana" as con_id for power enable */
-+		.hids = power_enable_hids_vana,
-+		.type_from = INT3472_GPIO_TYPE_POWER_ENABLE,
-+		.type_to = INT3472_GPIO_TYPE_POWER_ENABLE,
-+		.con_id = "vana",
-+		.enable_time_us = GPIO_REGULATOR_ENABLE_TIME,
- 	},
- };
- 
-+static bool int3472_gpio_map_hids_match(struct acpi_device *adev,
-+					const char * const *hids)
-+{
-+	for (unsigned int i = 0; hids[i]; i++) {
-+		if (acpi_dev_hid_uid_match(adev, hids[i], NULL))
-+			return true;
-+	}
-+
-+	return false;
-+}
-+
- static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3472, u8 *type,
- 					    const char **con_id, unsigned long *gpio_flags,
- 					    unsigned int *enable_time_us)
-@@ -182,7 +215,7 @@ static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3
- 		if (*type != int3472_gpio_map[i].type_from)
- 			continue;
- 
--		if (!acpi_dev_hid_uid_match(adev, int3472_gpio_map[i].hid, NULL))
-+		if (!int3472_gpio_map_hids_match(adev, int3472_gpio_map[i].hids))
- 			continue;
- 
- 		dev_dbg(int3472->dev, "mapping type 0x%02x pin to 0x%02x %s\n",
-@@ -234,8 +267,8 @@ static void int3472_get_con_id_and_polarity(struct int3472_discrete_device *int3
- 	case INT3472_GPIO_TYPE_HANDSHAKE:
- 		*con_id = "dvdd";
- 		*gpio_flags = GPIO_ACTIVE_HIGH;
--		/* Setups using a handshake pin need 25 ms enable delay */
--		*enable_time_us = 25 * USEC_PER_MSEC;
-+		/* Powering up the sensor through the handshake pin takes up to 200 ms */
-+		*enable_time_us = 200 * USEC_PER_MSEC;
- 		break;
- 	default:
- 		*con_id = "unknown";
-@@ -289,8 +322,8 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 	u8 active_value, pin, type;
- 	unsigned long gpio_flags;
- 	union acpi_object *obj;
-+	unsigned int obj_value;
- 	struct gpio_desc *gpio;
--	const char *err_msg;
- 	const char *con_id;
- 	int ret;
- 
-@@ -305,24 +338,27 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 				      &int3472_gpio_guid, 0x00,
- 				      int3472->ngpios + 2,
- 				      NULL, ACPI_TYPE_INTEGER);
--
- 	if (!obj) {
- 		dev_warn(int3472->dev, "No _DSM entry for GPIO pin %u\n",
- 			 agpio->pin_table[0]);
- 		return 1;
- 	}
- 
--	type = FIELD_GET(INT3472_GPIO_DSM_TYPE, obj->integer.value);
-+	obj_value = obj->integer.value;
-+
-+	ACPI_FREE(obj);
-+
-+	type = FIELD_GET(INT3472_GPIO_DSM_TYPE, obj_value);
- 
- 	int3472_get_con_id_and_polarity(int3472, &type, &con_id, &gpio_flags, &enable_time_us);
- 
--	pin = FIELD_GET(INT3472_GPIO_DSM_PIN, obj->integer.value);
-+	pin = FIELD_GET(INT3472_GPIO_DSM_PIN, obj_value);
- 	/* Pin field is not really used under Windows and wraps around at 8 bits */
- 	if (pin != (agpio->pin_table[0] & 0xff))
- 		dev_dbg(int3472->dev, FW_BUG "%s %s pin number mismatch _DSM %d resource %d\n",
- 			con_id, agpio->resource_source.string_ptr, pin, agpio->pin_table[0]);
- 
--	active_value = FIELD_GET(INT3472_GPIO_DSM_SENSOR_ON_VAL, obj->integer.value);
-+	active_value = FIELD_GET(INT3472_GPIO_DSM_SENSOR_ON_VAL, obj_value);
- 	if (!active_value)
- 		gpio_flags ^= GPIO_ACTIVE_LOW;
- 
-@@ -330,15 +366,18 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 		agpio->resource_source.string_ptr, agpio->pin_table[0],
- 		str_high_low(gpio_flags == GPIO_ACTIVE_HIGH));
- 
-+	int3472->ngpios++;
-+
- 	switch (type) {
- 	case INT3472_GPIO_TYPE_RESET:
- 	case INT3472_GPIO_TYPE_POWERDOWN:
- 	case INT3472_GPIO_TYPE_HOTPLUG_DETECT:
- 		ret = skl_int3472_map_gpio_to_sensor(int3472, agpio, con_id, gpio_flags);
- 		if (ret)
--			err_msg = "Failed to map GPIO pin to sensor\n";
-+			return dev_err_probe(int3472->dev, ret,
-+					     "Failed to map GPIO pin to sensor\n");
- 
--		break;
-+		return 1;
- 	case INT3472_GPIO_TYPE_CLK_ENABLE:
- 	case INT3472_GPIO_TYPE_PRIVACY_LED:
- 	case INT3472_GPIO_TYPE_STROBE:
-@@ -346,24 +385,24 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 	case INT3472_GPIO_TYPE_DOVDD:
- 	case INT3472_GPIO_TYPE_HANDSHAKE:
- 		gpio = skl_int3472_gpiod_get_from_temp_lookup(int3472, agpio, con_id, gpio_flags);
--		if (IS_ERR(gpio)) {
--			ret = PTR_ERR(gpio);
--			err_msg = "Failed to get GPIO\n";
--			break;
--		}
-+		if (IS_ERR(gpio))
-+			return dev_err_probe(int3472->dev, PTR_ERR(gpio),
-+					     "Failed to get GPIO\n");
- 
- 		switch (type) {
- 		case INT3472_GPIO_TYPE_CLK_ENABLE:
- 			ret = skl_int3472_register_gpio_clock(int3472, gpio);
- 			if (ret)
--				err_msg = "Failed to register clock\n";
-+				dev_err_probe(int3472->dev, ret,
-+					      "Failed to register clock\n");
- 
- 			break;
- 		case INT3472_GPIO_TYPE_PRIVACY_LED:
- 		case INT3472_GPIO_TYPE_STROBE:
- 			ret = skl_int3472_register_led(int3472, gpio, con_id);
- 			if (ret)
--				err_msg = "Failed to register LED\n";
-+				dev_err_probe(int3472->dev, ret,
-+					      "Failed to register LED\n");
- 
- 			break;
- 		case INT3472_GPIO_TYPE_POWER_ENABLE:
-@@ -374,7 +413,8 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 			ret = skl_int3472_register_regulator(int3472, gpio, enable_time_us,
- 							     con_id, second_sensor);
- 			if (ret)
--				err_msg = "Failed to register regulator\n";
-+				dev_err_probe(int3472->dev, ret,
-+					      "Failed to register regulator\n");
- 
- 			break;
- 		default: /* Never reached */
-@@ -385,23 +425,13 @@ static int skl_int3472_handle_gpio_resources(struct acpi_resource *ares,
- 		if (ret)
- 			gpiod_put(gpio);
- 
--		break;
-+		return ret < 0 ? ret : 1;
- 	default:
- 		dev_warn(int3472->dev,
- 			 "GPIO type 0x%02x unknown; the sensor may not work\n",
- 			 type);
--		ret = 1;
--		break;
-+		return 1;
- 	}
--
--	int3472->ngpios++;
--	ACPI_FREE(obj);
--
--	if (ret < 0)
--		return dev_err_probe(int3472->dev, ret, err_msg);
--
--	/* Tell acpi_dev_get_resources() to not make a copy of the resource */
--	return 1;
- }
- 
- int int3472_discrete_parse_crs(struct int3472_discrete_device *int3472)
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index e8886a9b64d9..493b65965c8c 100644
+index 729776086879..523789e82355 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
 @@ -637,6 +637,13 @@ config PWM_ROCKCHIP
@@ -5401,26 +3522,327 @@ index 000000000000..d4b13fba8d23
 +MODULE_AUTHOR("Naushir Patuck <naush@raspberrypi.com>");
 +MODULE_AUTHOR("Andrea della Porta <andrea.porta@suse.com>");
 +MODULE_LICENSE("GPL");
-diff --git a/drivers/soundwire/dmi-quirks.c b/drivers/soundwire/dmi-quirks.c
-index ff00c4b2578e..ad8853481835 100644
---- a/drivers/soundwire/dmi-quirks.c
-+++ b/drivers/soundwire/dmi-quirks.c
-@@ -199,6 +199,13 @@ static const struct dmi_system_id adr_remap_quirk_table[] = {
- 		},
- 		.driver_data = (void *)ghost_realtek,
- 	},
-+	{
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "83QM"),
-+		},
-+		.driver_data = (void *)ghost_realtek,
+diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
+index 05b9233b9418..f512ecbd19b3 100644
+--- a/drivers/rtc/Kconfig
++++ b/drivers/rtc/Kconfig
+@@ -1999,6 +1999,18 @@ config RTC_DRV_R7301
+ 	   This driver can also be built as a module. If so, the module
+ 	   will be called rtc-r7301.
+ 
++config RTC_DRV_RPI
++	tristate "Raspberry Pi RTC"
++	depends on RASPBERRYPI_FIRMWARE || (COMPILE_TEST && !RASPBERRYPI_FIRMWARE)
++	depends on ARCH_BCM2835 || COMPILE_TEST
++	default ARCH_BCM2835
++	help
++	  If you say yes here you get support for the RTC found on
++	  Raspberry Pi 5th gen devices.
++
++	  This driver can also be built as a module. If so, the module
++	  will be called rtc-raspberrypi.
++
+ config RTC_DRV_STM32
+ 	tristate "STM32 RTC"
+ 	select REGMAP_MMIO
+diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
+index 0347645b021f..46f1a0fc2416 100644
+--- a/drivers/rtc/Makefile
++++ b/drivers/rtc/Makefile
+@@ -144,6 +144,7 @@ obj-$(CONFIG_RTC_DRV_PS3)	+= rtc-ps3.o
+ obj-$(CONFIG_RTC_DRV_PXA)	+= rtc-pxa.o
+ obj-$(CONFIG_RTC_DRV_R7301)	+= rtc-r7301.o
+ obj-$(CONFIG_RTC_DRV_R9701)	+= rtc-r9701.o
++obj-$(CONFIG_RTC_DRV_RPI)	+= rtc-raspberrypi.o
+ obj-$(CONFIG_RTC_DRV_RC5T583)	+= rtc-rc5t583.o
+ obj-$(CONFIG_RTC_DRV_RC5T619)	+= rtc-rc5t619.o
+ obj-$(CONFIG_RTC_DRV_RK808)	+= rtc-rk808.o
+diff --git a/drivers/rtc/rtc-raspberrypi.c b/drivers/rtc/rtc-raspberrypi.c
+new file mode 100644
+index 000000000000..0547a96c62ac
+--- /dev/null
++++ b/drivers/rtc/rtc-raspberrypi.c
+@@ -0,0 +1,278 @@
++// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
++/**
++ * rtc-raspberrypi.c
++ *
++ * RTC driver using firmware mailbox
++ * Supports battery backed RTC and wake alarms
++ *
++ * Based on rtc-meson-vrtc by Neil Armstrong
++ *
++ * Copyright (c) 2023, Raspberry Pi Ltd.
++ */
++
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/rtc.h>
++#include <linux/of.h>
++#include <soc/bcm2835/raspberrypi-firmware.h>
++
++#define	RTC_TIME		0
++#define	RTC_ALARM		1
++#define	RTC_ALARM_PENDING	2
++#define	RTC_ALARM_ENABLE	3
++#define	RTC_BBAT_CHG_VOLTS	4
++#define	RTC_BBAT_CHG_VOLTS_MIN	5
++#define	RTC_BBAT_CHG_VOLTS_MAX	6
++#define	RTC_BBAT_VOLTS		7
++
++struct rpi_rtc_data {
++	struct rtc_device *rtc;
++	struct rpi_firmware *fw;
++	u32 bbat_vchg_millivolts;
++	u32 bbat_vchg_min_millivolts;
++	u32 bbat_vchg_max_millivolts;
++};
++
++struct rpi_rtc_reg {
++	__le32 reg;
++	__le32 val;
++} __packed;
++
++static int rpi_rtc_read_time(struct device *dev, struct rtc_time *tm)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_TIME)
++	};
++	int err;
++
++	err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_GET_RTC_REG,
++				    &data, sizeof(data));
++	rtc_time64_to_tm(le32_to_cpu(data.val), tm);
++	return err;
++}
++
++static int rpi_rtc_set_time(struct device *dev, struct rtc_time *tm)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_TIME),
++		.val = cpu_to_le32(rtc_tm_to_time64(tm))
++	};
++
++	return rpi_firmware_property(rtc->fw, RPI_FIRMWARE_SET_RTC_REG,
++				     &data, sizeof(data));
++}
++
++static int rpi_rtc_alarm_irq_is_enabled(struct device *dev, unsigned char *enabled)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_ALARM_ENABLE)
++	};
++	int err;
++
++	err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_GET_RTC_REG,
++				    &data, sizeof(data));
++	*enabled = le32_to_cpu(data.val) & 0x1;
++	return err;
++}
++
++static int rpi_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_ALARM_ENABLE),
++		.val = cpu_to_le32(enabled)
++	};
++
++	return rpi_firmware_property(rtc->fw, RPI_FIRMWARE_SET_RTC_REG,
++				     &data, sizeof(data));
++}
++
++static int rpi_rtc_alarm_clear_pending(struct device *dev)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_ALARM_PENDING),
++		.val = cpu_to_le32(1)
++	};
++
++	return rpi_firmware_property(rtc->fw, RPI_FIRMWARE_SET_RTC_REG,
++				     &data, sizeof(data));
++}
++
++static int rpi_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_ALARM)
++	};
++	int err;
++
++	err = rpi_rtc_alarm_irq_is_enabled(dev, &alarm->enabled);
++	if (!err)
++		err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_GET_RTC_REG,
++					    &data, sizeof(data));
++	rtc_time64_to_tm(le32_to_cpu(data.val), &alarm->time);
++
++	return err;
++}
++
++static int rpi_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_ALARM),
++		.val = cpu_to_le32(rtc_tm_to_time64(&alarm->time))
++	};
++	int err;
++
++	err = rpi_rtc_alarm_clear_pending(dev);
++
++	if (!err)
++		err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_SET_RTC_REG,
++					    &data, sizeof(data));
++
++	if (!err)
++		err = rpi_rtc_alarm_irq_enable(dev, alarm->enabled);
++
++	return err;
++}
++
++static const struct rtc_class_ops rpi_rtc_ops = {
++	.read_time = rpi_rtc_read_time,
++	.set_time = rpi_rtc_set_time,
++	.read_alarm = rpi_rtc_read_alarm,
++	.set_alarm = rpi_rtc_set_alarm,
++	.alarm_irq_enable = rpi_rtc_alarm_irq_enable,
++};
++
++static void rpi_rtc_set_limits(struct device *dev)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_BBAT_CHG_VOLTS_MIN)
++	};
++
++	int err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_GET_RTC_REG,
++					&data, sizeof(data));
++	if (!err)
++		rtc->bbat_vchg_min_millivolts = le32_to_cpu(data.val) / 1000U;
++	else
++		dev_warn(dev, "failed to get minimum trickle charge voltage\n");
++
++	data.reg = cpu_to_le32(RTC_BBAT_CHG_VOLTS_MAX);
++	data.val = cpu_to_le32(0);
++	err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_GET_RTC_REG,
++				    &data, sizeof(data));
++	if (!err)
++		rtc->bbat_vchg_max_millivolts = le32_to_cpu(data.val) / 1000U;
++	else
++		dev_warn(dev, "failed to get maximum trickle charge voltage\n");
++}
++
++static void rpi_rtc_set_charge_voltage(struct device *dev)
++{
++	struct rpi_rtc_data *rtc = dev_get_drvdata(dev);
++	struct rpi_rtc_reg data = {
++		.reg = cpu_to_le32(RTC_BBAT_CHG_VOLTS),
++		.val = cpu_to_le32(rtc->bbat_vchg_millivolts * 1000U)
++	};
++	int err;
++
++	if (rtc->bbat_vchg_millivolts != 0 &&
++	    (rtc->bbat_vchg_millivolts < rtc->bbat_vchg_min_millivolts ||
++	    rtc->bbat_vchg_millivolts > rtc->bbat_vchg_max_millivolts)) {
++		dev_warn(dev, "trickle charge voltage %umV is outside of the supported range (%umV - %umV)\n",
++			 rtc->bbat_vchg_millivolts,
++			 rtc->bbat_vchg_min_millivolts,
++			 rtc->bbat_vchg_max_millivolts);
++		return;
++	}
++
++	err = rpi_firmware_property(rtc->fw, RPI_FIRMWARE_SET_RTC_REG,
++				    &data, sizeof(data));
++
++	if (err)
++		dev_err(dev, "failed to set trickle charge voltage to %umV: %d\n",
++			rtc->bbat_vchg_millivolts, err);
++	else if (rtc->bbat_vchg_millivolts)
++		dev_info(dev, "trickle charging enabled at %umV\n",
++			 rtc->bbat_vchg_millivolts);
++}
++
++static int rpi_rtc_probe(struct platform_device *pdev)
++{
++	struct rpi_rtc_data *rtc;
++	struct device *dev = &pdev->dev;
++	struct rpi_firmware *firmware;
++	int ret;
++
++	// Get the firmware device from the parent device
++	firmware = devm_rpi_firmware_get(dev, dev->parent->of_node);
++
++	if (!firmware)
++		return -EPROBE_DEFER;
++
++	rtc = devm_kzalloc(dev, sizeof(*rtc), GFP_KERNEL);
++	if (!rtc)
++		return -ENOMEM;
++
++	rtc->fw = firmware;
++
++	ret = devm_device_init_wakeup(dev);
++	if (ret)
++		return ret;
++
++	platform_set_drvdata(pdev, rtc);
++
++	rtc->rtc = devm_rtc_allocate_device(dev);
++	if (IS_ERR(rtc->rtc))
++		return PTR_ERR(rtc->rtc);
++
++	rtc->rtc->range_max = U32_MAX;           /* 2106-02-07 */
++
++	set_bit(RTC_FEATURE_ALARM_WAKEUP_ONLY, rtc->rtc->features);
++	clear_bit(RTC_FEATURE_UPDATE_INTERRUPT, rtc->rtc->features);
++
++	rtc->rtc->ops = &rpi_rtc_ops;
++
++	rpi_rtc_alarm_clear_pending(dev);
++
++	/*
++	 * The trickle-voltage property lives on the parent firmware node
++	 * because we deliberately do not create a DT child node just to
++	 * instantiate this driver (see DT maintainer guidance).
++	 * The firmware driver registers us as a platform device at runtime.
++	 */
++	rtc->bbat_vchg_millivolts = 0;
++	of_property_read_u32(dev->parent->of_node, "trickle-voltage-millivolt",
++			     &rtc->bbat_vchg_millivolts);
++
++	rpi_rtc_set_limits(dev);
++	rpi_rtc_set_charge_voltage(dev);
++
++	return devm_rtc_register_device(rtc->rtc);
++}
++
++static const struct platform_device_id raspberrypi_rtc_id[] = {
++	{ "raspberrypi-rtc" },
++	{ }
++};
++MODULE_DEVICE_TABLE(platform, raspberrypi_rtc_id);
++
++static struct platform_driver rpi_rtc_driver = {
++	.driver = {
++		.name = "raspberrypi-rtc",
 +	},
- 	{
- 		.matches = {
- 			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
++	.id_table = raspberrypi_rtc_id,
++	.probe = rpi_rtc_probe
++};
++
++module_platform_driver(rpi_rtc_driver);
++
++MODULE_AUTHOR("Jonathan Bell <jonathan@raspberrypi.com>");
++MODULE_AUTHOR("Sander Speetjens <sander.speetjens@gmail.com>");
++MODULE_DESCRIPTION("Raspberry Pi RTC driver");
++MODULE_LICENSE("Dual BSD/GPL");
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index b119f5b6065c..4dbae2e80b1f 100644
+index b446905b48be..20e60bc403b4 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5912,6 +5912,13 @@ static void hub_event(struct work_struct *work)
@@ -5437,108 +3859,6 @@ index b119f5b6065c..4dbae2e80b1f 100644
  	/* Lock the device, then check to see if we were
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
-diff --git a/include/crypto/if_alg.h b/include/crypto/if_alg.h
-index 7643ba954125..0d51428c1da4 100644
---- a/include/crypto/if_alg.h
-+++ b/include/crypto/if_alg.h
-@@ -8,6 +8,7 @@
- #ifndef _CRYPTO_IF_ALG_H
- #define _CRYPTO_IF_ALG_H
- 
-+#include <linux/bits.h>
- #include <linux/compiler.h>
- #include <linux/completion.h>
- #include <linux/if_alg.h>
-@@ -121,7 +122,7 @@ struct af_alg_async_req {
-  * @iv:			IV for cipher operation
-  * @state:		Existing state for continuing operation
-  * @aead_assoclen:	Length of AAD for AEAD cipher operations
-- * @completion:		Work queue for synchronous operation
-+ * @wait:		For waiting for completion of async crypto ops
-  * @used:		TX bytes sent to kernel. This variable is used to
-  *			ensure that user space cannot cause the kernel
-  *			to allocate too much memory in sendmsg operation.
-@@ -161,9 +162,20 @@ struct af_alg_ctx {
- 	unsigned int inflight;
- };
- 
-+/* Flags for af_alg_allowlist_entry::flags: */
-+#define AF_ALG_UNPRIVILEGED BIT(0) /* Unprivileged use is allowed */
-+
-+struct af_alg_allowlist_entry {
-+	const char *name;
-+	u32 flags;
-+};
-+
- int af_alg_register_type(const struct af_alg_type *type);
- int af_alg_unregister_type(const struct af_alg_type *type);
- 
-+int af_alg_check_restriction(const char *name,
-+			     const struct af_alg_allowlist_entry allowlist[]);
-+
- int af_alg_release(struct socket *sock);
- void af_alg_release_parent(struct sock *sk);
- int af_alg_accept(struct sock *sk, struct socket *newsock,
-@@ -177,10 +189,11 @@ static inline struct alg_sock *alg_sk(struct sock *sk)
- }
- 
- /**
-- * Size of available buffer for sending data from user space to kernel.
-+ * af_alg_sndbuf - Size of available buffer for sending data from user space to kernel.
-  *
-- * @sk socket of connection to user space
-- * @return number of bytes still available
-+ * @sk: socket of connection to user space
-+ *
-+ * Returns: number of bytes still available
-  */
- static inline int af_alg_sndbuf(struct sock *sk)
- {
-@@ -192,10 +205,11 @@ static inline int af_alg_sndbuf(struct sock *sk)
- }
- 
- /**
-- * Can the send buffer still be written to?
-+ * af_alg_writable - Can the send buffer still be written to?
-+ *
-+ * @sk: socket of connection to user space
-  *
-- * @sk socket of connection to user space
-- * @return true => writable, false => not writable
-+ * Returns: true => writable, false => not writable
-  */
- static inline bool af_alg_writable(struct sock *sk)
- {
-@@ -203,10 +217,11 @@ static inline bool af_alg_writable(struct sock *sk)
- }
- 
- /**
-- * Size of available buffer used by kernel for the RX user space operation.
-+ * af_alg_rcvbuf - Size of available buffer used by kernel for the RX user space operation.
-  *
-- * @sk socket of connection to user space
-- * @return number of bytes still available
-+ * @sk: socket of connection to user space
-+ *
-+ * Returns: number of bytes still available
-  */
- static inline int af_alg_rcvbuf(struct sock *sk)
- {
-@@ -218,10 +233,11 @@ static inline int af_alg_rcvbuf(struct sock *sk)
- }
- 
- /**
-- * Can the RX buffer still be written to?
-+ * af_alg_readable - Can the RX buffer still be read from?
-+ *
-+ * @sk: socket of connection to user space
-  *
-- * @sk socket of connection to user space
-- * @return true => writable, false => not writable
-+ * Returns: true => readable, false => not readable
-  */
- static inline bool af_alg_readable(struct sock *sk)
- {
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
 index b7c97f1c47c9..0a484f45b24a 100644
 --- a/include/linux/crypto.h
@@ -5553,7 +3873,7 @@ index b7c97f1c47c9..0a484f45b24a 100644
   * Miscellaneous stuff.
   */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 24221a842412..4b1d4ec2c684 100644
+index aa15ff88539b..08ae6d9c9af1 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -5670,34 +3990,6 @@ index 65c9609ec207..2cc243ec73f6 100644
  #ifdef CONFIG_PERF_EVENTS
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
-diff --git a/include/linux/random.h b/include/linux/random.h
-index 8a8064dc3970..3238fab8f749 100644
---- a/include/linux/random.h
-+++ b/include/linux/random.h
-@@ -9,6 +9,13 @@
- 
- #include <uapi/linux/random.h>
- 
-+struct iov_iter;
-+
-+struct random_extrng {
-+	ssize_t (*extrng_read_iter)(struct iov_iter *iter, bool reseed);
-+	struct module *owner;
-+};
-+
- struct notifier_block;
- 
- void add_device_randomness(const void *buf, size_t len);
-@@ -135,6 +142,9 @@ int random_prepare_cpu(unsigned int cpu);
- int random_online_cpu(unsigned int cpu);
- #endif
- 
-+void random_register_extrng(const struct random_extrng *rng);
-+void random_unregister_extrng(void);
-+
- #ifndef MODULE
- extern const struct file_operations random_fops, urandom_fops;
- #endif
 diff --git a/include/linux/security.h b/include/linux/security.h
 index 153e9043058f..2ee3a8990968 100644
 --- a/include/linux/security.h
@@ -5716,6 +4008,26 @@ index 153e9043058f..2ee3a8990968 100644
 +#endif /* CONFIG_SECURITY_LOCKDOWN_LSM */
 +
  #endif /* ! __LINUX_SECURITY_H */
+diff --git a/include/soc/bcm2835/raspberrypi-firmware.h b/include/soc/bcm2835/raspberrypi-firmware.h
+index 975bef529854..8c3d43977a03 100644
+--- a/include/soc/bcm2835/raspberrypi-firmware.h
++++ b/include/soc/bcm2835/raspberrypi-firmware.h
+@@ -75,6 +75,7 @@ enum rpi_firmware_property_tag {
+ 	RPI_FIRMWARE_GET_THROTTLED =                          0x00030046,
+ 	RPI_FIRMWARE_GET_CLOCK_MEASURED =                     0x00030047,
+ 	RPI_FIRMWARE_NOTIFY_REBOOT =                          0x00030048,
++	RPI_FIRMWARE_GET_RTC_REG =                            0x00030087,
+ 	RPI_FIRMWARE_SET_CLOCK_STATE =                        0x00038001,
+ 	RPI_FIRMWARE_SET_CLOCK_RATE =                         0x00038002,
+ 	RPI_FIRMWARE_SET_VOLTAGE =                            0x00038003,
+@@ -92,6 +93,7 @@ enum rpi_firmware_property_tag {
+ 	RPI_FIRMWARE_SET_POE_HAT_VAL =                        0x00030050,
+ 	RPI_FIRMWARE_NOTIFY_XHCI_RESET =                      0x00030058,
+ 	RPI_FIRMWARE_NOTIFY_DISPLAY_DONE =                    0x00030066,
++	RPI_FIRMWARE_SET_RTC_REG =                            0x00038087,
+ 
+ 	/* Dispmanx TAGS */
+ 	RPI_FIRMWARE_FRAMEBUFFER_ALLOCATE =                   0x00040001,
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
 index 590ba29c85ab..02153d857531 100644
 --- a/kernel/module/signing.c
@@ -5739,20 +4051,6 @@ index 590ba29c85ab..02153d857531 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
-diff --git a/net/core/page_pool.c b/net/core/page_pool.c
-index 34ce99514d72..d7c88c0b67e5 100644
---- a/net/core/page_pool.c
-+++ b/net/core/page_pool.c
-@@ -1073,7 +1073,8 @@ netmem_ref page_pool_alloc_frag_netmem(struct page_pool *pool,
- 	if (WARN_ON(size > max_size))
- 		return 0;
- 
--	size = ALIGN(size, dma_get_cache_alignment());
-+	size = ALIGN(size, max_t(unsigned int, dma_get_cache_alignment(),
-+				 __alignof__(struct skb_shared_info)));
- 	*offset = pool->frag_offset;
- 
- 	if (netmem && *offset + size > max_size) {
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 0a4fdd8bd975..dcb12dad419f 100644
 --- a/scripts/Makefile.lib
@@ -5769,7 +4067,7 @@ index 0a4fdd8bd975..dcb12dad419f 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index c9dc2763a505..17ce478a7ef8 100755
+index 41e38df96984..d35505058ebb 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
@@ -5851,95 +4149,6 @@ index 8d46886d2cca..14a9cdff942b 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
-diff --git a/sound/hda/codecs/realtek/alc269.c b/sound/hda/codecs/realtek/alc269.c
-index e98cc42e1a78..fdba2adea459 100644
---- a/sound/hda/codecs/realtek/alc269.c
-+++ b/sound/hda/codecs/realtek/alc269.c
-@@ -2309,6 +2309,33 @@ static void alc_fixup_headset_mode_alc255_no_hp_mic(struct hda_codec *codec,
- 	}
- }
- 
-+/*
-+ * On the Acer Aspire A515-57G (and possibly other models sharing this
-+ * board), if headphones are already inserted into the combo jack before
-+ * the codec powers up (cold boot), the impedance-based headset-type
-+ * sensing races and misclassifies the jack, driving the wrong output
-+ * configuration (audible as missing center-panned/vocal content). A
-+ * genuine physical unplug/replug after boot fixes it by forcing a fresh
-+ * sense transient. Mirror that here on cold boot only: give the sense
-+ * hardware time to settle, then force a fresh classification.
-+ */
-+static void alc_fixup_headset_mode_acer_coldboot(struct hda_codec *codec,
-+						 const struct hda_fixup *fix, int action)
-+{
-+	struct alc_spec *spec = codec->spec;
-+
-+	alc_fixup_headset_mode(codec, fix, action);
-+
-+	if (action == HDA_FIXUP_ACT_INIT &&
-+	    !is_s3_resume(codec) && !is_s4_resume(codec) &&
-+		spec->current_headset_mode != ALC_HEADSET_MODE_UNPLUGGED) {
-+		msleep(500);
-+		spec->current_headset_mode = ALC_HEADSET_MODE_UNKNOWN;
-+		spec->current_headset_type = ALC_HEADSET_TYPE_UNKNOWN;
-+		alc_fixup_headset_mode(codec, fix, action);
-+	}
-+}
-+
- static void alc288_update_headset_jack_cb(struct hda_codec *codec,
- 				       struct hda_jack_callback *jack)
- {
-@@ -4134,6 +4161,7 @@ enum {
- 	ALC282_FIXUP_ACER_DISABLE_LINEOUT,
- 	ALC255_FIXUP_ACER_LIMIT_INT_MIC_BOOST,
- 	ALC256_FIXUP_ACER_HEADSET_MIC,
-+	ALC256_FIXUP_ACER_COLDBOOT,
- 	ALC285_FIXUP_IDEAPAD_S740_COEF,
- 	ALC285_FIXUP_HP_LIMIT_INT_MIC_BOOST,
- 	ALC295_FIXUP_ASUS_DACS,
-@@ -6158,6 +6186,12 @@ static const struct hda_fixup alc269_fixups[] = {
- 		.chained = true,
- 		.chain_id = ALC269_FIXUP_HEADSET_MODE_NO_HP_MIC
- 	},
-+	[ALC256_FIXUP_ACER_COLDBOOT] = {
-+		.type = HDA_FIXUP_FUNC,
-+		.v.func = alc_fixup_headset_mode_acer_coldboot,
-+		.chained = true,
-+		.chain_id = ALC256_FIXUP_ACER_SFG16_MICMUTE_LED,
-+	},
- 	[ALC285_FIXUP_IDEAPAD_S740_COEF] = {
- 		.type = HDA_FIXUP_FUNC,
- 		.v.func = alc285_fixup_ideapad_s740_coef,
-@@ -6969,6 +7003,7 @@ static const struct hda_quirk alc269_fixup_tbl[] = {
- 	SND_PCI_QUIRK(0x1025, 0x1597, "Acer Nitro 5 AN517-55", ALC2XX_FIXUP_HEADSET_MIC),
- 	SND_PCI_QUIRK(0x1025, 0x159e, "Acer Nitro 5 AN515-46", ALC2XX_FIXUP_HEADSET_MIC),
- 	SND_PCI_QUIRK(0x1025, 0x160e, "Acer PT316-51S", ALC2XX_FIXUP_HEADSET_MIC),
-+	SND_PCI_QUIRK(0x1025, 0x1616, "Acer Aspire A515-57", ALC256_FIXUP_ACER_COLDBOOT),
- 	SND_PCI_QUIRK(0x1025, 0x161f, "Acer S40-54", ALC256_FIXUP_ACER_MIC_NO_PRESENCE),
- 	SND_PCI_QUIRK(0x1025, 0x1640, "Acer Aspire A315-44P", ALC256_FIXUP_ACER_SFG16_MICMUTE_LED),
- 	SND_PCI_QUIRK(0x1025, 0x1679, "Acer Nitro 16 AN16-41", ALC2XX_FIXUP_HEADSET_MIC),
-diff --git a/sound/soc/sof/ipc4-topology.c b/sound/soc/sof/ipc4-topology.c
-index 8f37fbdd3f7f..5ac0195e8505 100644
---- a/sound/soc/sof/ipc4-topology.c
-+++ b/sound/soc/sof/ipc4-topology.c
-@@ -2352,11 +2352,14 @@ sof_ipc4_prepare_copier_module(struct snd_sof_widget *swidget,
- 				ch_map >>= 4;
- 			}
- 
--			if (swidget->id == snd_soc_dapm_dai_in && ch_count == out_ref_channels) {
-+			if ((swidget->id == snd_soc_dapm_dai_in && ch_count == out_ref_channels) ||
-+			    ch_count < blob->alh_cfg.device_count) {
- 				/*
- 				 * For playback DAI widgets where the channel number is equal to
--				 * the output reference channels, set the step = 0 to ensure all
--				 * the ch_mask is applied to all alh mappings.
-+				 * the output reference channels, or when there are fewer
-+				 * channels than aggregated devices (e.g. a mono capture
-+				 * stream split across multiple links), set step = 0 to
-+				 * ensure all the ch_mask is applied to all alh mappings.
- 				 */
- 				mask = ch_mask;
- 				step = 0;
 diff --git a/tools/testing/selftests/bpf/DENYLIST.rhel b/tools/testing/selftests/bpf/DENYLIST.rhel
 new file mode 100644
 index 000000000000..9424a83c6f48
@@ -6023,18 +4232,20 @@ index 000000000000..9424a83c6f48
 +test_bpffs                                       # needs CONFIG_BPF_PRELOAD
 +tunnel                                           # needs CONFIG_NET_FOU
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 5ae24ee10100..37b840c46e8b 100644
+index 93c707116fad..d9168137151b 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -530,7 +530,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -529,8 +529,8 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
 -LSKELS_EXTRA := test_ksyms_module.c test_ksyms_weak.c kfunc_call_test.c \
+-	kfunc_call_test_subprog.c test_global_percpu_data.c
 +LSKELS_EXTRA := test_ksyms_module.c kfunc_call_test.c \
- 	kfunc_call_test_subprog.c
++	kfunc_call_test_subprog.c
  SKEL_BLACKLIST += $$(LSKELS) $$(LSKELS_SIGNED)
  
+ test_static_linked.skel.h-deps := test_static_linked1.bpf.o test_static_linked2.bpf.o
 diff --git a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
 index 1d7a2f1e0731..b22f3a9cb8b8 100644
 --- a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
