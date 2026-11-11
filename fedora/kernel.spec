@@ -169,18 +169,18 @@ Summary: The Linux kernel
 #  unreleased kernel development snapshot.
 %global released_kernel 1
 # define buildid .local
-%define specrpmversion 7.3.3
-%define specversion 7.3.3
+%define specrpmversion 7.3.4
+%define specversion 7.3.4
 %define patchversion 7.3
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.3.3
+%define tarfile_release 7.3.4
 # This is needed to do merge window version magic
 %define patchlevel 3
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.3.3
+%define kabiversion 7.3.4
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4827,6 +4827,12 @@ fi\
 #
 #
 %changelog
+* Tue Nov 10 2026 Augusto Caringi <acaringi@redhat.com> [7.3.4-300]
+- crypto: testmgr - fix trailing whitespace from merge conflict resolution (Augusto Caringi)
+
+* Tue Nov 10 2026 Augusto Caringi <acaringi@redhat.com> [7.3.4-0]
+- Linux v7.3.4
+
 * Fri Nov 06 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.3-0]
 - Linux v7.3.3
 

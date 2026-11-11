@@ -312,7 +312,7 @@ index 782389bd5cd3..33671e98b824 100644
  M:	Florian Fainelli <florian.fainelli@broadcom.com>
  M:	Ray Jui <rjui@broadcom.com>
 diff --git a/Makefile b/Makefile
-index a8f35bdca5d4..792c1b4742cc 100644
+index 05c5b682ad50..147865c7a62e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -425,10 +425,10 @@ index 1f4ebec68370..4f81fbdb85b5 100644
  };
  
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index cab741a695f5..f7beaea5c213 100644
+index 70994918fab5..82e9d31d471b 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1573,7 +1573,7 @@ endchoice
+@@ -1574,7 +1574,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -1199,7 +1199,7 @@ index 7d2048da5c3a..6b4e2163fcc5 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 4958211fbfa9..ee6d34885696 100644
+index 9419d61d0602..1c2e3469be5f 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3831,7 +3831,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -1211,16 +1211,16 @@ index 4958211fbfa9..ee6d34885696 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -3967,7 +3967,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -3968,7 +3968,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
- 	 * for vectors with only a public key.
+ 	 * for vectors with only a public key or an invalid signature.
  	 */
--	if (vecs->public_key_vec)
-+	if (1 || vecs->public_key_vec)
+-	if (vecs->public_key_vec || vecs->verify_error)
++	if (1 || vecs->public_key_vec || vecs->verify_error)
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4790,14 +4790,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4791,14 +4791,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -1318,7 +1318,7 @@ index 163a3cccf197..cce23a1b5d71 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index 08ab56e95566..3d29a2511800 100644
+index f3fd56f15334..a4a62a16164f 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -727,6 +727,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -3024,10 +3024,10 @@ index cd1bca7ede9a..821027f45794 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 1aa87a3ef9ed..59ed9c2bf2d4 100644
+index d4fcc336bc2a..7a6edccce002 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4510,6 +4510,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
+@@ -4534,6 +4534,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
  }
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ASPEED, 0x1150, quirk_aspeed_pci_bridge_no_alias);
  
