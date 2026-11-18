@@ -1,9 +1,9 @@
 {
   "branch": "f45",
-  "commit": "82bed2799374561f8c35224e73e4436b85eccdc5",
-  "nvr": "kernel-7.3.4-300",
-  "version": "7.3.4",
+  "commit": "3393e4e0db8129398c14fed17e09abdd0d1d9822",
+  "nvr": "kernel-7.3.5-300",
+  "version": "7.3.5",
   "patchversion": "7.3",
   "pkgrelease": "300",
-  "kabiversion": "7.3.4"
+  "kabiversion": "7.3.5"
 }

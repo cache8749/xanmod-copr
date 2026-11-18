@@ -169,18 +169,18 @@ Summary: The Linux kernel
 #  unreleased kernel development snapshot.
 %global released_kernel 1
 # define buildid .local
-%define specrpmversion 7.3.4
-%define specversion 7.3.4
+%define specrpmversion 7.3.5
+%define specversion 7.3.5
 %define patchversion 7.3
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.3.4
+%define tarfile_release 7.3.5
 # This is needed to do merge window version magic
 %define patchlevel 3
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.3.4
+%define kabiversion 7.3.5
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4827,8 +4827,35 @@ fi\
 #
 #
 %changelog
-* Tue Nov 10 2026 Augusto Caringi <acaringi@redhat.com> [7.3.4-300]
+* Tue Nov 17 2026 Augusto Caringi <acaringi@redhat.com> [7.3.5-0]
+- drm/i915/dp: Fix source PHY updates for UHBR links with LTTPRs (Frederik Schwan)
+- Revert "phy: qcom: qmp-pcie: Skip PHY reset if already up" (Michael Burch)
+- firmware: raspberrypi: Add bcm2712 revD compatible check (Peter Robinson)
+- media: ipu-bridge: Add DMI quirk for Dell 14 Premium DA14250 (Keith Harvey)
+- media: ipu-bridge: Add upside-down sensor quirks for the Surface Pro 9 (Fernando Rimoli)
+- media: ipu-bridge: Add upside-down sensor DMI quirk for Samsung Galaxy Book3 Pro (Felipe Calliari)
+- media: ipu-bridge: Keep the clock-noncontinuous property name out of rodata (Fernando Rimoli)
+- media: ipu-bridge: add sensor configuration for OV8858 (INT3477) (Thierry Chatard)
+- media: ipu-bridge: Add the ST VD55G1 (TBE20A1) (Ruslan Koreev)
+- media: ipu-bridge: Add OV13858 sensor config (Sergey Lebedev)
+- media: ipu-bridge: Add upside-down quirk for Surface Pro 11 (Sergey Lebedev)
+- media: ipu-bridge: Add sensor rotation quirk for Dell XPS 14 (Dell 14 Premium) DA14250 (Kate Hsuan)
+- media: ipu-bridge: Add OV01A1B sensor config (Steve Kaznak)
+- media: ipu-bridge: Add upside-down sensor DMI quirk for Samsung Galaxy Book3 Ultra (Felipe Calliari)
+- media: ipu-bridge: Request non-continuous clock for ov5693 on IPU6 (Fernando Rimoli)
+- media: ipu-bridge: Match sensor configs per IPU and add config flags (Fernando Rimoli)
+- media: ipu-bridge: Assign endpoint property indices dynamically (Fernando Rimoli)
+- media: ipu-bridge: Add OVTI5693 to the list of supported sensors (Fernando Rimoli)
+- media: ipu-bridge: Add upside-down quirk for Dell Pro 14 Premium PA14260 (Pierre Pinon)
+- media: ipu-bridge: Add ipu_bridge_get_ipu6() (Sakari Ailus)
+- media: ipu-bridge: Add support additional link frequency (Serin Yeh)
+- media: ipu-bridge: Print more debug information on connected devices (Sakari Ailus)
+- media: cvs: Default selection to VIDEO_INTEL_IPU6 (Sakari Ailus)
+- media: cvs: Drop comments on sub-device operations (Sakari Ailus)
+- media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1 (Kate Hsuan)
+- media: cvs: Use ipu_bridge_get_ipu6() (Sakari Ailus)
 - crypto: testmgr - fix trailing whitespace from merge conflict resolution (Augusto Caringi)
+- Linux v7.3.5
 
 * Tue Nov 10 2026 Augusto Caringi <acaringi@redhat.com> [7.3.4-0]
 - Linux v7.3.4
